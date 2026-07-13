@@ -1,3 +1,4 @@
 {
-  "name": "biblequiz"
+  "name": "biblequiz",
+  "pages_build_output_dir": "out"
 }
