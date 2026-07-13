@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { Suspense, useEffect, useRef, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import QuestionCard from "@/components/QuestionCard";
 import QuizGrid from "@/components/QuizGrid";
@@ -28,7 +28,7 @@ interface ResultData {
   results: any[];
 }
 
-export default function QuizPlayPage() {
+function QuizPlayContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const ids = searchParams.get("ids") || "";
@@ -357,5 +357,13 @@ export default function QuizPlayPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function QuizPlayPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-20 text-gray-500">Loading...</div>}>
+      <QuizPlayContent />
+    </Suspense>
   );
 }
