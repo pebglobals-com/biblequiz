@@ -17,8 +17,9 @@ export async function POST(req: NextRequest) {
       session_id: sessionId,
       age_bracket: ageBracket,
       sermon_ids: sermonIdsStr,
-      score: 0,
+       score: 0,
       total: answers.length,
+      completed_at: null,
     });
 
     let score = 0;
