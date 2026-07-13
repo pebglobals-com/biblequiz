@@ -1,0 +1,64 @@
+export type AgeBracket = "junior" | "senior";
+
+export interface Sermon {
+  id: number;
+  title: string;
+  source_url: string;
+  content: string;
+  age_bracket: AgeBracket;
+  category: string;
+  created_at: string;
+}
+
+export interface Question {
+  id: number;
+  sermon_id: number;
+  question_text: string;
+  options: string[];
+  correct_answer: string;
+  age_bracket: AgeBracket;
+  created_at: string;
+}
+
+export interface QuizSession {
+  id: number;
+  session_id: string;
+  age_bracket: AgeBracket;
+  sermon_ids: string;
+  score: number;
+  total: number;
+  completed_at: string | null;
+}
+
+export interface QuizAnswer {
+  id: number;
+  session_id: string;
+  question_id: number;
+  selected_answer: string | null;
+  is_correct: boolean | null;
+  timestamp: string;
+}
+
+export interface QuizQuestion {
+  id: number;
+  question_text: string;
+  options: string[];
+  sermon_id: number;
+  sermon_title?: string;
+}
+
+export interface QuizResult {
+  question_id: number;
+  question_text: string;
+  options: string[];
+  correct_answer: string;
+  selected_answer: string | null;
+  is_correct: boolean | null;
+  sermon_title: string;
+}
+
+export interface Recommendation {
+  topic: string;
+  reason: string;
+  sermon_id: number;
+}
