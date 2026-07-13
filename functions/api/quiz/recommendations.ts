@@ -1,18 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { getRecommendations } from "@/lib/ai";
+import { db } from "../../lib/db";
+import { getRecommendations } from "../../lib/ai";
 
-export async function POST(req: NextRequest) {
+export async function onRequestPost({ request }: { request: Request }) {
   try {
-    const { sessionId } = await req.json();
+    const { sessionId } = await request.json();
 
     if (!sessionId) {
-      return NextResponse.json({ error: "sessionId required" }, { status: 400 });
+      return new Response(
+        JSON.stringify({ error: "sessionId required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     const session = db.quizSessions.getById(sessionId);
     if (!session) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+      return new Response(
+        JSON.stringify({ error: "Session not found" }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     const answers = db.quizAnswers.getBySession(sessionId);
@@ -43,8 +48,14 @@ export async function POST(req: NextRequest) {
       recommendations = await getRecommendations(failedQuestions, allSermons);
     }
 
-    return NextResponse.json({ recommendations, failedCount: failedQuestions.length });
+    return new Response(
+      JSON.stringify({ recommendations, failedCount: failedQuestions.length }),
+      { headers: { "Content-Type": "application/json" } }
+    );
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return new Response(
+      JSON.stringify({ error: err.message }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }

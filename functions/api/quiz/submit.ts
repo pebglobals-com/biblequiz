@@ -1,23 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { generateSessionId } from "@/lib/utils";
+import { db } from "../../lib/db";
 
-export async function POST(req: NextRequest) {
+export async function onRequestPost({ request }: { request: Request }) {
   try {
-    const { ageBracket, answers, sermonIds } = await req.json();
+    const { ageBracket, answers, sermonIds } = await request.json();
 
     if (!ageBracket || !answers || !Array.isArray(answers)) {
-      return NextResponse.json({ error: "ageBracket and answers array required" }, { status: 400 });
+      return new Response(
+        JSON.stringify({ error: "ageBracket and answers array required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    const sessionId = generateSessionId();
+    const sessionId = `quiz_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const sermonIdsStr = (sermonIds || []).join(",");
 
     const session = db.quizSessions.create({
       session_id: sessionId,
       age_bracket: ageBracket,
       sermon_ids: sermonIdsStr,
-       score: 0,
+      score: 0,
       total: answers.length,
       completed_at: null,
     });
@@ -61,8 +62,13 @@ export async function POST(req: NextRequest) {
       completed_at: new Date().toISOString(),
     });
 
-    return NextResponse.json({ sessionId, score, total: answers.length, results });
+    return new Response(JSON.stringify({ sessionId, score, total: answers.length, results }), {
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return new Response(
+      JSON.stringify({ error: err.message }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }

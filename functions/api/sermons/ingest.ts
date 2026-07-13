@@ -1,27 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { categorizeContent, generateQuestions } from "@/lib/ai";
+import { db } from "../../lib/db";
+import { categorizeContent, generateQuestions } from "../../lib/ai";
 
-export async function POST(req: NextRequest) {
+export async function onRequestPost({ request }: { request: Request }) {
   try {
-    const { url, ageBracket, text } = await req.json();
+    const { url, ageBracket, text } = await request.json();
 
     if (!ageBracket || !["junior", "senior"].includes(ageBracket)) {
-      return NextResponse.json({ error: "Valid ageBracket (junior/senior) is required" }, { status: 400 });
+      return new Response(
+        JSON.stringify({ error: "Valid ageBracket (junior/senior) is required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     let content = text || "";
 
     if (url && !text) {
       try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        const res = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-
+        const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const html = await res.text();
-
         const textMatch = html.match(/<p[^>]*>([\s\S]*?)<\/p>/gi);
         if (textMatch) {
           content = textMatch
@@ -29,7 +26,6 @@ export async function POST(req: NextRequest) {
             .filter((t: string) => t.length > 20)
             .join("\n\n");
         }
-
         if (!content || content.length < 50) {
           content = html
             .replace(/<[^>]*>/g, " ")
@@ -38,28 +34,30 @@ export async function POST(req: NextRequest) {
             .slice(0, 10000);
         }
       } catch (err: any) {
-        return NextResponse.json({ error: `Failed to fetch URL: ${err.message}` }, { status: 400 });
+        return new Response(
+          JSON.stringify({ error: `Failed to fetch URL: ${err.message}` }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
       }
     }
 
     if (!content || content.length < 20) {
-      return NextResponse.json({ error: "Insufficient content. Provide valid URL or text." }, { status: 400 });
+      return new Response(
+        JSON.stringify({ error: "Insufficient content. Provide valid URL or text." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     const categorized = await categorizeContent(content, ageBracket);
-    const title = categorized.title;
-    const category = categorized.category;
-    const adjustedContent = categorized.adjustedContent;
-
     const sermon = db.sermons.create({
-      title,
+      title: categorized.title,
       source_url: url || "",
-      content: adjustedContent,
+      content: categorized.adjustedContent,
       age_bracket: ageBracket,
-      category,
+      category: categorized.category,
     });
 
-    const questions = await generateQuestions(adjustedContent, ageBracket);
+    const questions = await generateQuestions(categorized.adjustedContent, ageBracket);
     const validQuestions = questions.filter(
       (q) => q.question_text && q.options?.length === 4 && q.correct_answer
     );
@@ -76,11 +74,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({
-      sermon,
-      questionsGenerated: validQuestions.length,
-    });
+    return new Response(
+      JSON.stringify({ sermon, questionsGenerated: validQuestions.length }),
+      { headers: { "Content-Type": "application/json" } }
+    );
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Ingestion failed" }, { status: 500 });
+    return new Response(
+      JSON.stringify({ error: err.message || "Ingestion failed" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }
