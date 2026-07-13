@@ -1,8 +1,9 @@
 import { db } from "../../lib/db";
 import { getRecommendations } from "../../lib/ai";
 
-export async function onRequestPost({ request }: { request: Request }) {
+export async function onRequestPost({ request, env }: { request: Request; env: any }) {
   try {
+    const apiKey = env.OPENCODE_API_KEY || "";
     const { sessionId } = await request.json();
 
     if (!sessionId) {
@@ -45,7 +46,7 @@ export async function onRequestPost({ request }: { request: Request }) {
     let recommendations: any[] = [];
 
     if (failedQuestions.length > 0 && allSermons.length > 0) {
-      recommendations = await getRecommendations(failedQuestions, allSermons);
+      recommendations = await getRecommendations(failedQuestions, allSermons, apiKey);
     }
 
     return new Response(

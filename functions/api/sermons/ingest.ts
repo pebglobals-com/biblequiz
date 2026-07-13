@@ -1,8 +1,9 @@
 import { db } from "../../lib/db";
 import { categorizeContent, generateQuestions } from "../../lib/ai";
 
-export async function onRequestPost({ request }: { request: Request }) {
+export async function onRequestPost({ request, env }: { request: Request; env: any }) {
   try {
+    const apiKey = env.OPENCODE_API_KEY || "";
     const { url, ageBracket, text } = await request.json();
 
     if (!ageBracket || !["junior", "senior"].includes(ageBracket)) {
@@ -48,7 +49,7 @@ export async function onRequestPost({ request }: { request: Request }) {
       );
     }
 
-    const categorized = await categorizeContent(content, ageBracket);
+    const categorized = await categorizeContent(content, ageBracket, apiKey);
     const sermon = db.sermons.create({
       title: categorized.title,
       source_url: url || "",
@@ -57,7 +58,7 @@ export async function onRequestPost({ request }: { request: Request }) {
       category: categorized.category,
     });
 
-    const questions = await generateQuestions(categorized.adjustedContent, ageBracket);
+    const questions = await generateQuestions(categorized.adjustedContent, ageBracket, apiKey);
     const validQuestions = questions.filter(
       (q) => q.question_text && q.options?.length === 4 && q.correct_answer
     );

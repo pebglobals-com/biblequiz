@@ -1,8 +1,9 @@
 import { db } from "../../lib/db";
 import { generateQuestions } from "../../lib/ai";
 
-export async function onRequestPost({ request }: { request: Request }) {
+export async function onRequestPost({ request, env }: { request: Request; env: any }) {
   try {
+    const apiKey = env.OPENCODE_API_KEY || "";
     const { sermonId } = await request.json();
 
     if (!sermonId) {
@@ -28,7 +29,7 @@ export async function onRequestPost({ request }: { request: Request }) {
       );
     }
 
-    const questions = await generateQuestions(sermon.content, sermon.age_bracket);
+    const questions = await generateQuestions(sermon.content, sermon.age_bracket, apiKey);
     const valid = questions.filter(
       (q) => q.question_text && q.options?.length === 4 && q.correct_answer
     );
