@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const answers = db.quizAnswers.getBySession(sessionId);
     const failedQuestionIds = answers
-      .filter((a) => a.is_correct === 0)
+      .filter((a) => !a.is_correct)
       .map((a) => a.question_id);
 
     const allQuestions = db.questions.getAll();
