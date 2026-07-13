@@ -35,7 +35,7 @@ export interface QuizAnswer {
   session_id: string;
   question_id: number;
   selected_answer: string | null;
-  is_correct: boolean | null;
+  is_correct: boolean | number | null;
   timestamp: string;
 }
 
@@ -53,7 +53,7 @@ export interface QuizResult {
   options: string[];
   correct_answer: string;
   selected_answer: string | null;
-  is_correct: boolean | null;
+  is_correct: boolean | number | null;
   sermon_title: string;
 }
 
