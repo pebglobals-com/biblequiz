@@ -45,26 +45,29 @@ export default function SermonIngestion({ ageBracket, onIngested }: SermonIngest
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
-      <h3 className="text-lg font-bold mb-4">Add Sermon / Topic</h3>
+    <div className="card p-6">
+      <div className="flex items-center gap-2 mb-5">
+        <span className="text-xl">📝</span>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Add Sermon / Topic</h3>
+      </div>
 
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setUseText(false)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
             !useText
-              ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+              ? "bg-gradient-to-r from-bible-500 to-purple-500 text-white shadow-md"
+              : "glass text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5"
           }`}
         >
           From URL
         </button>
         <button
           onClick={() => setUseText(true)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
             useText
-              ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+              ? "bg-gradient-to-r from-bible-500 to-purple-500 text-white shadow-md"
+              : "glass text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5"
           }`}
         >
           Paste Text
@@ -72,29 +75,43 @@ export default function SermonIngestion({ ageBracket, onIngested }: SermonIngest
       </div>
 
       {!useText ? (
-        <input
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://example.com/sermon"
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </div>
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com/sermon"
+            className="input-field pl-12"
+          />
+        </div>
       ) : (
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Paste sermon text here..."
           rows={6}
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+          className="input-field resize-none"
         />
       )}
 
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && (
+        <div className="mt-3 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+          <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          {error}
+        </div>
+      )}
 
       <button
         onClick={handleIngest}
         disabled={loading}
-        className="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors"
+        className="mt-4 btn-primary w-full"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
@@ -105,7 +122,12 @@ export default function SermonIngestion({ ageBracket, onIngested }: SermonIngest
             Processing with AI...
           </span>
         ) : (
-          "Ingest & Generate Questions"
+          <span className="flex items-center justify-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Ingest & Generate Questions
+          </span>
         )}
       </button>
     </div>

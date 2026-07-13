@@ -202,15 +202,31 @@ function QuizPlayContent() {
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-gray-500">Loading questions...</div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin h-8 w-8 text-bible-500" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-gray-500">Loading questions...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!ids || questions.length === 0) {
     return (
-      <div className="text-center py-20">
-        <p className="text-gray-500 mb-4">No questions available for selected topics</p>
-        <button onClick={() => router.push("/quiz/setup")} className="px-6 py-2 bg-blue-600 text-white rounded-lg">
-          Back to Setup
+      <div className="card p-16 text-center animate-in">
+        <div className="text-5xl mb-4">📭</div>
+        <p className="text-gray-500 dark:text-gray-400 mb-4 font-medium">No questions available for selected topics</p>
+        <button onClick={() => router.push("/quiz/setup")} className="btn-primary">
+          <span className="flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Setup
+          </span>
         </button>
       </div>
     );
@@ -258,22 +274,47 @@ function QuizPlayContent() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          {age === "junior" ? "Junior Quiz" : "Senior Quiz"}
-        </h1>
+    <div className="animate-in">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">
+            {age === "junior" ? "🧒 Junior Quiz" : "🧑 Senior Quiz"}
+          </h1>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="w-32 h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-bible-500 to-purple-500 transition-all duration-300"
+                style={{ width: `${(answeredCount / questions.length) * 100}%` }}
+              />
+            </div>
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              {answeredCount}/{questions.length}
+            </span>
+          </div>
+        </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {answeredCount}/{questions.length} answered
-          </span>
           {allAnswered && (
             <button
               onClick={handleSubmitQuiz}
               disabled={submitting}
-              className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold rounded-xl transition-colors"
+              className="btn-success"
             >
-              {submitting ? "Submitting..." : "Submit Quiz"}
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Submitting...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  Submit Quiz
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+              )}
             </button>
           )}
         </div>
@@ -282,8 +323,8 @@ function QuizPlayContent() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           {currentQuestion ? (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200 dark:border-gray-700">
-              <div className="mb-4">
+            <div className="card p-6 sm:p-8">
+              <div className="mb-5">
                 <Timer duration={15} running={timerRunning} onExpire={handleTimerExpire} />
               </div>
 
@@ -298,7 +339,7 @@ function QuizPlayContent() {
                 onTtsDone={handleTtsDone}
               />
 
-              <div className="flex justify-between mt-6">
+              <div className="flex justify-between mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={() => {
                     setCurrentIndex(null);
@@ -306,33 +347,45 @@ function QuizPlayContent() {
                     setTimerRunning(false);
                     setShowFeedback(false);
                   }}
-                  className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="btn-secondary px-4 py-2 text-sm"
                 >
-                  Back to Grid
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    Back to Grid
+                  </span>
                 </button>
-                {showFeedback && !allAnswered && (
-                  <button
-                    onClick={handleNextQuestion}
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
-                  >
-                    Next Question
-                  </button>
-                )}
-                {showFeedback && allAnswered && (
-                  <button
-                    onClick={handleSubmitQuiz}
-                    disabled={submitting}
-                    className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold rounded-xl transition-colors"
-                  >
-                    {submitting ? "Submitting..." : "Submit Quiz"}
-                  </button>
-                )}
+                <div className="flex gap-2">
+                  {showFeedback && !allAnswered && (
+                    <button
+                      onClick={handleNextQuestion}
+                      className="btn-primary"
+                    >
+                      <span className="flex items-center gap-2">
+                        Next Question
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+                    </button>
+                  )}
+                  {showFeedback && allAnswered && (
+                    <button
+                      onClick={handleSubmitQuiz}
+                      disabled={submitting}
+                      className="btn-success"
+                    >
+                      {submitting ? "Submitting..." : "Submit Quiz"}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-12 border border-gray-200 dark:border-gray-700 text-center">
-              <div className="text-5xl mb-4">📖</div>
-              <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Select a Question</h2>
+            <div className="card p-16 text-center">
+              <div className="text-6xl mb-4 animate-float">📖</div>
+              <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Select a Question</h2>
               <p className="text-gray-500 dark:text-gray-400">
                 Click a number from the grid to begin
               </p>
@@ -362,7 +415,17 @@ function QuizPlayContent() {
 
 export default function QuizPlayPage() {
   return (
-    <Suspense fallback={<div className="text-center py-20 text-gray-500">Loading...</div>}>
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin h-8 w-8 text-bible-500" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    }>
       <QuizPlayContent />
     </Suspense>
   );

@@ -40,15 +40,24 @@ export default function Timer({ duration, running, onExpire }: TimerProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-1">
-        <span className={`text-sm font-bold ${urgent ? "text-red-500 animate-pulse" : "text-gray-600 dark:text-gray-400"}`}>
-          {timeLeft > 0 ? `${timeLeft}s` : "Time's up!"}
+      <div className="flex items-center justify-between mb-2">
+        <span className={`text-sm font-bold flex items-center gap-1.5 ${
+          urgent ? "text-red-500" : "text-gray-500 dark:text-gray-400"
+        }`}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {timeLeft > 0 ? `${timeLeft}s remaining` : "Time's up!"}
         </span>
       </div>
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+      <div className="w-full glass rounded-full h-3 p-0.5">
         <div
           className={`h-full rounded-full transition-all duration-300 ${
-            urgent ? "bg-red-500" : pct > 50 ? "bg-green-500" : "bg-yellow-500"
+            urgent
+              ? "bg-gradient-to-r from-red-500 to-red-600 animate-pulse-soft"
+              : pct > 50
+              ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
+              : "bg-gradient-to-r from-amber-400 to-amber-500"
           }`}
           style={{ width: `${pct}%` }}
         />

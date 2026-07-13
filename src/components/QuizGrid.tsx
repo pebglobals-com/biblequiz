@@ -16,41 +16,46 @@ export default function QuizGrid({ total, currentIndex, answered, onSelect, disa
   }[cols] || "grid-cols-5";
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
-      <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">
-        Questions
-      </h4>
+    <div className="card p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          Questions
+        </h4>
+      </div>
       <div className={`grid ${gridCols} gap-2`}>
         {Array.from({ length: total }, (_, i) => {
           const status = answered[i];
           const isActive = currentIndex === i;
 
-          let bg = "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300";
-          if (isActive) bg = "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold";
-          if (status === true) bg = "bg-green-500 text-white hover:bg-green-600";
-          if (status === false) bg = "bg-red-500 text-white hover:bg-red-600";
+          let style = "bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700";
+          if (isActive) style = "ring-2 ring-bible-500 bg-gradient-to-br from-bible-50 to-purple-50 dark:from-bible-900/30 dark:to-purple-900/30 text-bible-700 dark:text-bible-300 font-bold shadow-lg shadow-bible-500/20";
+          if (status === true) style = "bg-gradient-to-br from-emerald-400 to-emerald-500 text-white shadow-lg shadow-emerald-500/30";
+          if (status === false) style = "bg-gradient-to-br from-red-400 to-red-500 text-white shadow-lg shadow-red-500/30";
 
           return (
             <button
               key={i}
               onClick={() => !disabled && onSelect(i)}
               disabled={disabled}
-              className={`w-full aspect-square rounded-lg text-sm font-bold flex items-center justify-center transition-all ${bg}`}
+              className={`w-full aspect-square rounded-xl text-sm font-bold flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${style}`}
             >
               {i + 1}
             </button>
           );
         })}
       </div>
-      <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-green-500 inline-block" /> Correct
+      <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <span className="w-3 h-3 rounded bg-gradient-to-br from-emerald-400 to-emerald-500" /> Correct
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-red-500 inline-block" /> Incorrect
+        <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <span className="w-3 h-3 rounded bg-gradient-to-br from-red-400 to-red-500" /> Incorrect
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-gray-200 dark:bg-gray-700 inline-block" /> Unanswered
+        <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <span className="w-3 h-3 rounded bg-gray-200 dark:bg-gray-700" /> Unanswered
         </span>
       </div>
     </div>
