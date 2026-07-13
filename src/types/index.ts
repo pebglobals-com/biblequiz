@@ -28,6 +28,7 @@ export interface QuizSession {
   score: number;
   total: number;
   completed_at: string | null;
+  created_at: string;
 }
 
 export interface QuizAnswer {
