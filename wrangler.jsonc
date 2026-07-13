@@ -1,19 +1,10 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "bible-quiz-guide",
-  "main": ".next/worker.js",
-  "compatibility_date": "2026-07-01",
-  "pages_build_output_dir": ".vercel/output",
-
+  "pages_build_output_dir": "./.vercel/output/static",
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "bible-quiz-db",
-      "database_id": ""
+      "database_id": "6c2d9b83-23b3-4f0a-9457-d9f8942be1eb"
     }
-  ],
-
-  "env": {
-    "OPENCODE_API_KEY": ""
-  }
+  ]
 }
