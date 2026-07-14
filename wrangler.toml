@@ -1,3 +1,10 @@
 name = "biblequiz"
 pages_build_output_dir = "out"
 compatibility_date = "2026-07-13"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "biblequiz"
+database_id = ""
+migrations_dir = "wrangler/migrations"

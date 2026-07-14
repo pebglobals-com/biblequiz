@@ -1,117 +1,283 @@
 import type { Sermon, Question, QuizSession, QuizAnswer } from "./types";
 
-const sermons: Sermon[] = [];
-const questions: Question[] = [];
-const quizSessions: QuizSession[] = [];
-const quizAnswers: QuizAnswer[] = [];
+// In-memory fallback storage
+const memSermons: Sermon[] = [];
+const memQuestions: Question[] = [];
+const memSessions: QuizSession[] = [];
+const memAnswers: QuizAnswer[] = [];
+let memNextId: Record<string, number> = {};
 
-let nextId: Record<string, number> = {};
-
-function getNextId(collection: string): number {
-  if (!nextId[collection]) nextId[collection] = 1;
-  return nextId[collection]++;
+function memGetNextId(collection: string): number {
+  if (!memNextId[collection]) memNextId[collection] = 1;
+  return memNextId[collection]++;
 }
 
-function generateSessionId(): string {
-  return `quiz_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+// Seed data
+const SEED_SERMONS: Omit<Sermon, "id" | "created_at">[] = [
+  { title: "Who is God?", source_url: "https://example.com/who-is-god", content: "God is the Creator of everything - the heavens, the earth, and all living things. He is eternal, which means He has no beginning and no end. God is three persons in one: God the Father, God the Son (Jesus), and God the Holy Spirit. This is called the Trinity. God loves us very much. He created us in His image, which means we can think, love, and make choices. He wants to have a relationship with each one of us. The Bible tells us that 'God is love' (1 John 4:8). Even though we cannot see God with our eyes, we can know He is real through His creation, His Word (the Bible), and through Jesus who came to show us what God is like.", age_bracket: "junior" as const, category: "God's Character" },
+  { title: "Jesus Loves Me", source_url: "https://example.com/jesus-loves-me", content: "Jesus loves every child! The Bible says, 'Let the little children come to me, and do not hinder them, for the kingdom of heaven belongs to such as these' (Matthew 19:14). Jesus showed His love by coming to earth as a baby, growing up, teaching about God's love, healing sick people, and finally dying on the cross for our sins. He rose again three days later, showing He has power over death! When we believe in Jesus and ask Him to forgive our sins, He becomes our forever friend. He promises to never leave us (Hebrews 13:5).", age_bracket: "junior" as const, category: "Jesus" },
+  { title: "The Bible: God's Special Book", source_url: "https://example.com/bible-gods-book", content: "The Bible is God's Word written for us. It has 66 books - 39 in the Old Testament and 27 in the New Testament. The Old Testament tells about God's creation and His people before Jesus came. The New Testament tells about Jesus' life and the early church. The Bible is true and never changes. It teaches us how to live, how to love God, and how to love others. When we read the Bible, God speaks to our hearts.", age_bracket: "junior" as const, category: "The Bible" },
+  { title: "Prayer: Talking with God", source_url: "https://example.com/prayer-talking-with-god", content: "Prayer is simply talking to God - just like you talk to your best friend! You can pray anytime, anywhere, about anything. God loves to hear from His children. Jesus taught us how to pray in the Lord's Prayer (Matthew 6:9-13). We can pray using ACTS: Adoration, Confession, Thanksgiving, Supplication. God always answers prayers - sometimes yes, sometimes no, sometimes wait.", age_bracket: "junior" as const, category: "Prayer" },
+  { title: "The Trinity: Father, Son, Holy Spirit", source_url: "https://example.com/trinity", content: "The Trinity is one of the most profound mysteries of the Christian faith. God exists as three distinct persons - Father, Son, and Holy Spirit - yet is one God. This is not three gods, but one God in three persons. The Father is the Creator and Sustainer of all things. The Son (Jesus) is God become human - fully God and fully man. The Holy Spirit is God's presence with us today.", age_bracket: "senior" as const, category: "Theology" },
+  { title: "Apologetics: Defending Your Faith", source_url: "https://example.com/apologetics", content: "Apologetics comes from the Greek word 'apologia' meaning a reasoned defense. As Christians, we're called to 'always be prepared to give an answer to everyone who asks you to give the reason for the hope that you have' (1 Peter 3:15). Key areas of apologetics include evidence for God's existence, reliability of the Bible, the resurrection of Jesus, and the problem of evil.", age_bracket: "senior" as const, category: "Apologetics" },
+  { title: "Biblical Worldview", source_url: "https://example.com/biblical-worldview", content: "A worldview is the lens through which we interpret reality. Everyone has a worldview - the question is whether it's biblical. A biblical worldview answers life's big questions: Origin (Where did we come from?), Meaning (Why are we here?), Morality (How should we live?), Destiny (What happens after death?).", age_bracket: "senior" as const, category: "Worldview" },
+  { title: "Spiritual Disciplines for Growth", source_url: "https://example.com/spiritual-disciplines", content: "Spiritual disciplines are practices that position us to receive God's grace and grow in Christlikeness. They're not about earning God's favor. They're about creating space for the Holy Spirit to transform us. Key disciplines include Bible intake, prayer, worship, fellowship, fasting, solitude and silence, stewardship, and evangelism.", age_bracket: "senior" as const, category: "Christian Living" },
+];
+
+const SEED_QUESTIONS: { sermonIdx: number; question_text: string; options: string[]; correct_answer: string }[] = [
+  { sermonIdx: 0, question_text: "Who created everything?", options: ["God", "Aliens", "Nature", "Scientists"], correct_answer: "God" },
+  { sermonIdx: 0, question_text: "How many persons are in the Trinity?", options: ["One", "Two", "Three", "Four"], correct_answer: "Three" },
+  { sermonIdx: 0, question_text: "What does 'eternal' mean?", options: ["Very old", "Has no beginning and no end", "Lives a long time", "Never sleeps"], correct_answer: "Has no beginning and no end" },
+  { sermonIdx: 1, question_text: "What did Jesus say about children in Matthew 19:14?", options: ["Stay away", "Let the little children come to me", "Children are too noisy", "Wait until you're older"], correct_answer: "Let the little children come to me" },
+  { sermonIdx: 1, question_text: "What did Jesus do to show His love for us?", options: ["Gave us toys", "Died on the cross for our sins", "Wrote us letters", "Made us kings"], correct_answer: "Died on the cross for our sins" },
+  { sermonIdx: 1, question_text: "How many days after His death did Jesus rise again?", options: ["One", "Two", "Three", "Seven"], correct_answer: "Three" },
+  { sermonIdx: 2, question_text: "How many books are in the Bible?", options: ["50", "66", "100", "39"], correct_answer: "66" },
+  { sermonIdx: 2, question_text: "What does Psalm 119:105 say God's Word is?", options: ["A sword", "A lamp to my feet and a light to my path", "A shield", "A crown"], correct_answer: "A lamp to my feet and a light to my path" },
+  { sermonIdx: 3, question_text: "What is prayer?", options: ["Talking to God", "Making wishes", "Meditation", "Singing songs"], correct_answer: "Talking to God" },
+  { sermonIdx: 3, question_text: "What does the 'A' in ACTS prayer stand for?", options: ["Asking", "Adoration", "Answer", "Always"], correct_answer: "Adoration" },
+  { sermonIdx: 4, question_text: "The Trinity teaches that God is:", options: ["Three gods", "One God in three persons", "One person with three names", "A hierarchy"], correct_answer: "One God in three persons" },
+  { sermonIdx: 4, question_text: "Which person of the Trinity planned salvation?", options: ["The Father", "The Son", "The Holy Spirit", "All equally"], correct_answer: "The Father" },
+  { sermonIdx: 5, question_text: "What does 'apologetics' mean?", options: ["Saying sorry", "A reasoned defense of the faith", "Apologizing", "Debating"], correct_answer: "A reasoned defense of the faith" },
+  { sermonIdx: 5, question_text: "Which verse commands us to defend our faith?", options: ["John 3:16", "1 Peter 3:15", "Romans 8:28", "Philippians 4:13"], correct_answer: "1 Peter 3:15" },
+  { sermonIdx: 6, question_text: "A worldview is:", options: ["A view from space", "The lens through which we interpret reality", "A map of the world", "A philosophy class"], correct_answer: "The lens through which we interpret reality" },
+  { sermonIdx: 6, question_text: "Which is NOT a big question a worldview answers?", options: ["Origin", "Meaning", "Morality", "Money"], correct_answer: "Money" },
+  { sermonIdx: 7, question_text: "Spiritual disciplines are:", options: ["Ways to earn God's favor", "Practices to receive God's grace", "Rules for Christians", "Optional hobbies"], correct_answer: "Practices to receive God's grace" },
+  { sermonIdx: 7, question_text: "Which is NOT a classic spiritual discipline?", options: ["Bible intake", "Prayer", "Fasting", "Entertainment"], correct_answer: "Entertainment" },
+];
+
+export function createDb(d1: D1Database | null) {
+  // D1-backed implementation
+  if (d1) {
+    let seeded = false;
+    async function ensureSeeded() {
+      if (seeded) return;
+      const existing = await d1.prepare("SELECT COUNT(*) as count FROM sermons").first<{ count: number }>();
+      if (existing && existing.count > 0) { seeded = true; return; }
+      seeded = true;
+      for (const s of SEED_SERMONS) {
+        await d1.prepare("INSERT INTO sermons (title, source_url, content, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(s.title, s.source_url, s.content, s.age_bracket, s.category).run();
+      }
+      for (const q of SEED_QUESTIONS) {
+        const row = await d1.prepare("SELECT id FROM sermons WHERE title = ?").bind(SEED_SERMONS[q.sermonIdx].title).first<{ id: number }>();
+        if (row) {
+          await d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(row.id, q.question_text, JSON.stringify(q.options), q.correct_answer, SEED_SERMONS[q.sermonIdx].age_bracket).run();
+        }
+      }
+    }
+
+    return {
+      sermons: {
+        getAll: async (ageBracket?: string): Promise<Sermon[]> => {
+          await ensureSeeded();
+          let sql = "SELECT * FROM sermons";
+          const params: any[] = [];
+          if (ageBracket) { sql += " WHERE age_bracket = ?"; params.push(ageBracket); }
+          sql += " ORDER BY created_at DESC";
+          const { results } = await d1.prepare(sql).bind(...params).all<Sermon>();
+          return results || [];
+        },
+        getById: async (id: number): Promise<Sermon | undefined> => {
+          await ensureSeeded();
+          return d1.prepare("SELECT * FROM sermons WHERE id = ?").bind(id).first<Sermon>();
+        },
+        create: async (sermon: Omit<Sermon, "id" | "created_at">): Promise<Sermon> => {
+          await ensureSeeded();
+          const { success } = await d1.prepare("INSERT INTO sermons (title, source_url, content, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(sermon.title, sermon.source_url, sermon.content, sermon.age_bracket, sermon.category).run();
+          const row = await d1.prepare("SELECT * FROM sermons WHERE rowid = last_insert_rowid()").first<Sermon>();
+          return row || { ...sermon, id: Date.now(), created_at: new Date().toISOString() };
+        },
+      },
+      questions: {
+        getAll: async (ageBracket?: string, sermonIds?: number[]): Promise<Question[]> => {
+          await ensureSeeded();
+          let sql = "SELECT * FROM questions";
+          const params: any[] = [];
+          const clauses: string[] = [];
+          if (ageBracket) { clauses.push("age_bracket = ?"); params.push(ageBracket); }
+          if (sermonIds && sermonIds.length > 0) {
+            clauses.push(`sermon_id IN (${sermonIds.map(() => "?").join(",")})`);
+            params.push(...sermonIds);
+          }
+          if (clauses.length > 0) sql += " WHERE " + clauses.join(" AND ");
+          const { results } = await d1.prepare(sql).bind(...params).all<any>();
+          return (results || []).map((r: any) => ({ ...r, options: typeof r.options === "string" ? JSON.parse(r.options) : r.options }));
+        },
+        getBySermon: async (sermonId: number): Promise<Question[]> => {
+          await ensureSeeded();
+          const { results } = await d1.prepare("SELECT * FROM questions WHERE sermon_id = ?").bind(sermonId).all<any>();
+          return (results || []).map((r: any) => ({ ...r, options: typeof r.options === "string" ? JSON.parse(r.options) : r.options }));
+        },
+        create: async (question: Omit<Question, "id" | "created_at">): Promise<Question> => {
+          await ensureSeeded();
+          await d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(question.sermon_id, question.question_text, JSON.stringify(question.options), question.correct_answer, question.age_bracket).run();
+          const row = await d1.prepare("SELECT * FROM questions WHERE rowid = last_insert_rowid()").first<any>();
+          return { ...row, options: typeof row?.options === "string" ? JSON.parse(row.options) : row?.options || question.options };
+        },
+        createMany: async (items: Omit<Question, "id" | "created_at">[]): Promise<Question[]> => {
+          const results: Question[] = [];
+          for (const q of items) results.push(await questions.create(q));
+          return results;
+        },
+      },
+      quizSessions: {
+        create: async (session: Omit<QuizSession, "id" | "created_at">): Promise<QuizSession> => {
+          await ensureSeeded();
+          await d1.prepare("INSERT INTO quiz_sessions (session_id, age_bracket, sermon_ids, score, total, completed_at, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))").bind(session.session_id, session.age_bracket, session.sermon_ids, session.score, session.total, session.completed_at).run();
+          return d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(session.session_id).first<QuizSession>() || { ...session, id: Date.now(), created_at: new Date().toISOString() };
+        },
+        update: async (sessionId: string, updates: Partial<QuizSession>): Promise<QuizSession | undefined> => {
+          await ensureSeeded();
+          const sets: string[] = [];
+          const params: any[] = [];
+          if (updates.score !== undefined) { sets.push("score = ?"); params.push(updates.score); }
+          if (updates.total !== undefined) { sets.push("total = ?"); params.push(updates.total); }
+          if (updates.completed_at !== undefined) { sets.push("completed_at = ?"); params.push(updates.completed_at); }
+          if (sets.length > 0) {
+            params.push(sessionId);
+            await d1.prepare(`UPDATE quiz_sessions SET ${sets.join(", ")} WHERE session_id = ?`).bind(...params).run();
+          }
+          return d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(sessionId).first<QuizSession>();
+        },
+        getById: async (sessionId: string): Promise<QuizSession | undefined> => {
+          await ensureSeeded();
+          return d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(sessionId).first<QuizSession>();
+        },
+      },
+      quizAnswers: {
+        create: async (answer: Omit<QuizAnswer, "id">): Promise<QuizAnswer> => {
+          await ensureSeeded();
+          await d1.prepare("INSERT INTO quiz_answers (session_id, question_id, selected_answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?)").bind(answer.session_id, answer.question_id, answer.selected_answer, answer.is_correct, answer.timestamp).run();
+          return d1.prepare("SELECT * FROM quiz_answers WHERE rowid = last_insert_rowid()").first<QuizAnswer>() || { ...answer, id: Date.now() };
+        },
+        getBySession: async (sessionId: string): Promise<QuizAnswer[]> => {
+          await ensureSeeded();
+          const { results } = await d1.prepare("SELECT * FROM quiz_answers WHERE session_id = ?").bind(sessionId).all<QuizAnswer>();
+          return results || [];
+        },
+      },
+      stats: {
+        getCounts: async () => {
+          await ensureSeeded();
+          const totalSermons = (await d1.prepare("SELECT COUNT(*) as c FROM sermons").first<{ c: number }>())?.c || 0;
+          const juniorSermons = (await d1.prepare("SELECT COUNT(*) as c FROM sermons WHERE age_bracket = 'junior'").first<{ c: number }>())?.c || 0;
+          const seniorSermons = (await d1.prepare("SELECT COUNT(*) as c FROM sermons WHERE age_bracket = 'senior'").first<{ c: number }>())?.c || 0;
+          const totalQuestions = (await d1.prepare("SELECT COUNT(*) as c FROM questions").first<{ c: number }>())?.c || 0;
+          const juniorQuestions = (await d1.prepare("SELECT COUNT(*) as c FROM questions WHERE age_bracket = 'junior'").first<{ c: number }>())?.c || 0;
+          const seniorQuestions = (await d1.prepare("SELECT COUNT(*) as c FROM questions WHERE age_bracket = 'senior'").first<{ c: number }>())?.c || 0;
+          return { totalSermons, juniorSermons, seniorSermons, totalQuestions, juniorQuestions, seniorQuestions };
+        },
+      },
+    };
+  }
+
+  // In-memory fallback (async-compatible wrappers)
+  let memSeeded = false;
+  function ensureMemSeeded() {
+    if (memSeeded) return;
+    memSeeded = true;
+    for (const s of SEED_SERMONS) {
+      memSermons.push({ ...s, id: memGetNextId("sermons"), created_at: new Date().toISOString() });
+    }
+    for (const q of SEED_QUESTIONS) {
+      const sermon = memSermons[q.sermonIdx];
+      if (sermon) {
+        memQuestions.push({
+          id: memGetNextId("questions"),
+          sermon_id: sermon.id,
+          question_text: q.question_text,
+          options: q.options,
+          correct_answer: q.correct_answer,
+          age_bracket: sermon.age_bracket,
+          created_at: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
+  return {
+    sermons: {
+      getAll: async (ageBracket?: string): Promise<Sermon[]> => {
+        ensureMemSeeded();
+        let items = memSermons;
+        if (ageBracket) items = items.filter((s) => s.age_bracket === ageBracket);
+        return items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      },
+      getById: async (id: number): Promise<Sermon | undefined> => {
+        ensureMemSeeded();
+        return memSermons.find((s) => s.id === id);
+      },
+      create: async (sermon: Omit<Sermon, "id" | "created_at">): Promise<Sermon> => {
+        ensureMemSeeded();
+        const newSermon: Sermon = { ...sermon, id: memGetNextId("sermons"), created_at: new Date().toISOString() };
+        memSermons.push(newSermon);
+        return newSermon;
+      },
+    },
+    questions: {
+      getAll: async (ageBracket?: string, sermonIds?: number[]): Promise<Question[]> => {
+        ensureMemSeeded();
+        let items = memQuestions;
+        if (ageBracket) items = items.filter((q) => q.age_bracket === ageBracket);
+        if (sermonIds && sermonIds.length > 0) items = items.filter((q) => sermonIds.includes(q.sermon_id));
+        return items;
+      },
+      getBySermon: async (sermonId: number): Promise<Question[]> => {
+        ensureMemSeeded();
+        return memQuestions.filter((q) => q.sermon_id === sermonId);
+      },
+      create: async (question: Omit<Question, "id" | "created_at">): Promise<Question> => {
+        ensureMemSeeded();
+        const newQ: Question = { ...question, id: memGetNextId("questions"), created_at: new Date().toISOString() };
+        memQuestions.push(newQ);
+        return newQ;
+      },
+      createMany: async (items: Omit<Question, "id" | "created_at">[]): Promise<Question[]> => {
+        ensureMemSeeded();
+        const created: Question[] = [];
+        for (const q of items) {
+          const newQ: Question = { ...q, id: memGetNextId("questions"), created_at: new Date().toISOString() };
+          memQuestions.push(newQ);
+          created.push(newQ);
+        }
+        return created;
+      },
+    },
+    quizSessions: {
+      create: async (session: Omit<QuizSession, "id" | "created_at">): Promise<QuizSession> => {
+        ensureMemSeeded();
+        const newS: QuizSession = { ...session, id: memGetNextId("quiz_sessions"), created_at: new Date().toISOString() };
+        memSessions.push(newS);
+        return newS;
+      },
+      update: async (sessionId: string, updates: Partial<QuizSession>): Promise<QuizSession | undefined> => {
+        ensureMemSeeded();
+        const idx = memSessions.findIndex((s) => s.session_id === sessionId);
+        if (idx === -1) return undefined;
+        memSessions[idx] = { ...memSessions[idx], ...updates };
+        return memSessions[idx];
+      },
+      getById: async (sessionId: string): Promise<QuizSession | undefined> => {
+        ensureMemSeeded();
+        return memSessions.find((s) => s.session_id === sessionId);
+      },
+    },
+    quizAnswers: {
+      create: async (answer: Omit<QuizAnswer, "id">): Promise<QuizAnswer> => {
+        ensureMemSeeded();
+        const newA: QuizAnswer = { ...answer, id: memGetNextId("quiz_answers") };
+        memAnswers.push(newA);
+        return newA;
+      },
+      getBySession: async (sessionId: string): Promise<QuizAnswer[]> => {
+        ensureMemSeeded();
+        return memAnswers.filter((a) => a.session_id === sessionId);
+      },
+    },
+    stats: {
+      getCounts: async () => {
+        ensureMemSeeded();
+        return { totalSermons: memSermons.length, juniorSermons: memSermons.filter((s) => s.age_bracket === "junior").length, seniorSermons: memSermons.filter((s) => s.age_bracket === "senior").length, totalQuestions: memQuestions.length, juniorQuestions: memQuestions.filter((q) => q.age_bracket === "junior").length, seniorQuestions: memQuestions.filter((q) => q.age_bracket === "senior").length };
+      },
+    },
+  };
 }
-
-export const db = {
-  sermons: {
-    getAll: (ageBracket?: string): Sermon[] => {
-      let items = sermons;
-      if (ageBracket) items = items.filter((s) => s.age_bracket === ageBracket);
-      return items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    },
-    getById: (id: number): Sermon | undefined => {
-      return sermons.find((s) => s.id === id);
-    },
-    create: (sermon: Omit<Sermon, "id" | "created_at">): Sermon => {
-      const newSermon: Sermon = {
-        ...sermon,
-        id: getNextId("sermons"),
-        created_at: new Date().toISOString(),
-      };
-      sermons.push(newSermon);
-      return newSermon;
-    },
-  },
-
-  questions: {
-    getAll: (ageBracket?: string, sermonIds?: number[]): Question[] => {
-      let items = questions;
-      if (ageBracket) items = items.filter((q) => q.age_bracket === ageBracket);
-      if (sermonIds && sermonIds.length > 0) {
-        items = items.filter((q) => sermonIds.includes(q.sermon_id));
-      }
-      return items;
-    },
-    getBySermon: (sermonId: number): Question[] => {
-      return questions.filter((q) => q.sermon_id === sermonId);
-    },
-    create: (question: Omit<Question, "id" | "created_at">): Question => {
-      const newQuestion: Question = {
-        ...question,
-        id: getNextId("questions"),
-        created_at: new Date().toISOString(),
-      };
-      questions.push(newQuestion);
-      return newQuestion;
-    },
-    createMany: (items: Omit<Question, "id" | "created_at">[]): Question[] => {
-      const created: Question[] = [];
-      for (const q of items) {
-        const newQ: Question = { ...q, id: getNextId("questions"), created_at: new Date().toISOString() };
-        questions.push(newQ);
-        created.push(newQ);
-      }
-      return created;
-    },
-  },
-
-  quizSessions: {
-    create: (session: Omit<QuizSession, "id" | "created_at">): QuizSession => {
-      const newSession: QuizSession = {
-        ...session,
-        id: getNextId("quiz_sessions"),
-        created_at: new Date().toISOString(),
-      };
-      quizSessions.push(newSession);
-      return newSession;
-    },
-    update: (sessionId: string, updates: Partial<QuizSession>): QuizSession | undefined => {
-      const idx = quizSessions.findIndex((s) => s.session_id === sessionId);
-      if (idx === -1) return undefined;
-      quizSessions[idx] = { ...quizSessions[idx], ...updates };
-      return quizSessions[idx];
-    },
-    getById: (sessionId: string): QuizSession | undefined => {
-      return quizSessions.find((s) => s.session_id === sessionId);
-    },
-  },
-
-  quizAnswers: {
-    create: (answer: Omit<QuizAnswer, "id">): QuizAnswer => {
-      const newAnswer: QuizAnswer = {
-        ...answer,
-        id: getNextId("quiz_answers"),
-      };
-      quizAnswers.push(newAnswer);
-      return newAnswer;
-    },
-    getBySession: (sessionId: string): QuizAnswer[] => {
-      return quizAnswers.filter((a) => a.session_id === sessionId);
-    },
-  },
-
-  stats: {
-    getCounts: () => ({
-      totalSermons: sermons.length,
-      juniorSermons: sermons.filter((s) => s.age_bracket === "junior").length,
-      seniorSermons: sermons.filter((s) => s.age_bracket === "senior").length,
-      totalQuestions: questions.length,
-      juniorQuestions: questions.filter((q) => q.age_bracket === "junior").length,
-      seniorQuestions: questions.filter((q) => q.age_bracket === "senior").length,
-    }),
-  },
-};

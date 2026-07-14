@@ -12,7 +12,6 @@ interface QuizQuestion {
   question_text: string;
   options: string[];
   sermon_id: number;
-  correct_answer?: string;
 }
 
 interface AnswerRecord {
@@ -56,7 +55,7 @@ function QuizPlayContent() {
     async function fetchQuestions() {
       if (!ids) return;
       try {
-        const res = await fetch(`/api/questions?age=${age}&sermonIds=${ids}&withAnswers=true`);
+        const res = await fetch(`/api/questions?age=${age}&sermonIds=${ids}`);
         const data = await res.json();
         setQuestions(data.questions || []);
       } catch (err) {
@@ -120,45 +119,51 @@ function QuizPlayContent() {
     setTimerRunning(true);
   }
 
-  function handleAnswer(answer: string) {
-    if (showFeedback || quizDone || submitting) return;
-    const q = questions[currentIndex!];
-    const correct = answer === getCorrectAnswer(q.id);
-    setSelectedAnswer(answer);
-    setIsCorrect(correct);
-    setCorrectAnswer(getCorrectAnswer(q.id));
-    setShowFeedback(true);
-    setTimerRunning(false);
-
-    setAnswers((prev) => ({
-      ...prev,
-      [currentIndex!]: { questionId: q.id, selectedAnswer: answer, isCorrect: correct },
-    }));
-
-    playSound(correct ? "correct" : "wrong");
-    feedbackPendingRef.current = false;
+  async function validateAnswer(questionId: number, selectedAnswer: string | null) {
+    try {
+      const res = await fetch("/api/quiz/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId, selectedAnswer }),
+      });
+      return await res.json();
+    } catch {
+      return { isCorrect: null, correctAnswer: "" };
+    }
   }
 
-  function handleTimerExpire() {
-    if (showFeedback || quizDone || submitting) return;
+  async function handleAnswer(answer: string) {
+    if (feedbackPendingRef.current || showFeedback || quizDone || submitting) return;
+    feedbackPendingRef.current = true;
+    setTimerRunning(false);
     const q = questions[currentIndex!];
+    const data = await validateAnswer(q.id, answer);
+    setSelectedAnswer(answer);
+    setIsCorrect(data.isCorrect);
+    setCorrectAnswer(data.correctAnswer);
+    setShowFeedback(true);
+    setAnswers((prev) => ({
+      ...prev,
+      [currentIndex!]: { questionId: q.id, selectedAnswer: answer, isCorrect: data.isCorrect },
+    }));
+    playSound(data.isCorrect ? "correct" : "wrong");
+  }
+
+  async function handleTimerExpire() {
+    if (feedbackPendingRef.current || showFeedback || quizDone || submitting) return;
+    feedbackPendingRef.current = true;
+    setTimerRunning(false);
+    const q = questions[currentIndex!];
+    const data = await validateAnswer(q.id, null);
     setSelectedAnswer(null);
     setIsCorrect(null);
-    setCorrectAnswer(getCorrectAnswer(q.id));
+    setCorrectAnswer(data.correctAnswer);
     setShowFeedback(true);
-    setTimerRunning(false);
-
     setAnswers((prev) => ({
       ...prev,
       [currentIndex!]: { questionId: q.id, selectedAnswer: null, isCorrect: null },
     }));
-
     playSound("wrong");
-    feedbackPendingRef.current = false;
-  }
-
-  function getCorrectAnswer(questionId: number): string {
-    return questions.find((q) => q.id === questionId)?.correct_answer || "";
   }
 
   async function handleSubmitQuiz() {
@@ -203,13 +208,18 @@ function QuizPlayContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="flex flex-col items-center gap-3">
-          <svg className="animate-spin h-8 w-8 text-bible-500" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-gray-500">Loading questions...</p>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="skeleton h-8 w-48" />
+          <div className="skeleton h-8 w-32" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3">
+            <div className="skeleton h-96 rounded-2xl" />
+          </div>
+          <div className="lg:col-span-1">
+            <div className="skeleton h-80 rounded-2xl" />
+          </div>
         </div>
       </div>
     );
@@ -416,13 +426,18 @@ function QuizPlayContent() {
 export default function QuizPlayPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center py-20">
-        <div className="flex flex-col items-center gap-3">
-          <svg className="animate-spin h-8 w-8 text-bible-500" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-gray-500">Loading...</p>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="skeleton h-8 w-48" />
+          <div className="skeleton h-8 w-32" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3">
+            <div className="skeleton h-96 rounded-2xl" />
+          </div>
+          <div className="lg:col-span-1">
+            <div className="skeleton h-80 rounded-2xl" />
+          </div>
         </div>
       </div>
     }>

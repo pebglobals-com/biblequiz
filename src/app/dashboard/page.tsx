@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import AgeToggle from "@/components/AgeToggle";
-import SermonIngestion from "@/components/SermonIngestion";
 import type { AgeBracket, Sermon } from "@/types";
 
 export default function DashboardPage() {
-  const router = useRouter();
   const [ageBracket, setAgeBracket] = useState<AgeBracket>("junior");
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -31,38 +28,18 @@ export default function DashboardPage() {
     fetchSermons();
   }, [fetchSermons]);
 
-  function handleIngested(sermon: Sermon) {
-    setSermons((prev) => [sermon, ...prev]);
-    fetchSermons();
-  }
-
-  async function handleGenerateQuestions(sermonId: number) {
-    try {
-      await fetch("/api/questions/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sermonId }),
-      });
-      fetchSermons();
-    } catch (err) {
-      console.error("Failed to generate questions:", err);
-    }
-  }
-
   return (
     <div className="animate-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your sermons and questions</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Browse sermons and topics</p>
         </div>
         <AgeToggle value={ageBracket} onChange={setAgeBracket} />
       </div>
 
-      <SermonIngestion ageBracket={ageBracket} onIngested={handleIngested} />
-
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <StatCard icon="📖" value={stats.totalSermons} label="Total Sermons" color="from-blue-500 to-blue-600" />
           <StatCard icon="❓" value={stats.totalQuestions} label="Total Questions" color="from-purple-500 to-purple-600" />
           <StatCard icon="🧒" value={stats.juniorSermons} label="Junior" color="from-emerald-500 to-emerald-600" />
@@ -70,12 +47,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            {ageBracket === "junior" ? "🧒 Junior" : "🧑 Senior"} Sermons & Topics
-          </h2>
-        </div>
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-5">
+          {ageBracket === "junior" ? "🧒 Junior" : "🧑 Senior"} Sermons & Topics
+        </h2>
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
@@ -90,18 +65,12 @@ export default function DashboardPage() {
         ) : sermons.length === 0 ? (
           <div className="card p-12 text-center">
             <div className="text-5xl mb-4">📭</div>
-            <p className="text-gray-500 dark:text-gray-400 mb-2 font-medium">No sermons yet</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500">Add a URL or paste text above to get started</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-2 font-medium">No sermons yet in this bracket</p>
           </div>
         ) : (
           <div className="grid gap-4">
             {sermons.map((sermon, idx) => (
-              <SermonCard
-                key={sermon.id}
-                sermon={sermon}
-                onGenerate={handleGenerateQuestions}
-                delay={idx * 50}
-              />
+              <SermonCard key={sermon.id} sermon={sermon} delay={idx * 50} />
             ))}
           </div>
         )}
@@ -126,12 +95,9 @@ function StatCard({ icon, value, label, color }: { icon: string; value: number; 
   );
 }
 
-function SermonCard({ sermon, onGenerate, delay }: { sermon: Sermon; onGenerate: (id: number) => void; delay: number }) {
+function SermonCard({ sermon, delay }: { sermon: Sermon; delay: number }) {
   return (
-    <div
-      className="card-hover p-5"
-      style={{ animationDelay: `${delay}ms` }}
-    >
+    <div className="card-hover p-5" style={{ animationDelay: `${delay}ms` }}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
@@ -156,13 +122,6 @@ function SermonCard({ sermon, onGenerate, delay }: { sermon: Sermon; onGenerate:
             {sermon.content.slice(0, 200)}...
           </p>
         </div>
-        <button
-          onClick={() => onGenerate(sermon.id)}
-          className="shrink-0 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 transition-all duration-200"
-          title="Generate questions from this sermon"
-        >
-          Generate Qs
-        </button>
       </div>
     </div>
   );

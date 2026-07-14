@@ -23,11 +23,7 @@ function ResultsContent() {
 
     async function fetchResults() {
       try {
-        const res = await fetch("/api/quiz/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        });
+        const res = await fetch(`/api/quiz/submit?sessionId=${encodeURIComponent(sessionId)}`);
         const result = await res.json();
         setData(result);
 

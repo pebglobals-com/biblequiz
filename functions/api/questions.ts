@@ -1,15 +1,14 @@
-import { db } from "../lib/db";
+import { createDb } from "../lib/db";
 
-export async function onRequestGet({ request }: { request: Request }) {
+export async function onRequestGet({ request, env }: { request: Request; env: any }) {
   const url = new URL(request.url);
   const age = url.searchParams.get("age") || undefined;
   const sermonIdsParam = url.searchParams.get("sermonIds");
   const withAnswers = url.searchParams.get("withAnswers") === "true";
-  const sermonIds = sermonIdsParam
-    ? sermonIdsParam.split(",").map(Number).filter(Boolean)
-    : undefined;
+  const sermonIds = sermonIdsParam ? sermonIdsParam.split(",").map(Number).filter(Boolean) : undefined;
 
-  let questions = db.questions.getAll(age, sermonIds);
+  const db = createDb(env.DB || null);
+  let questions = await db.questions.getAll(age, sermonIds);
 
   const result = questions.map((q) => ({
     id: q.id,

@@ -1,5 +1,28 @@
 -- Migration 0001: Create initial tables for Bible Quiz Guide
 
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  branch TEXT NOT NULL DEFAULT '',
+  phone TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL,
+  age_bracket TEXT NOT NULL CHECK(age_bracket IN ('junior', 'senior')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS study_progress (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  sermon_id INTEGER NOT NULL,
+  completed INTEGER NOT NULL DEFAULT 0,
+  completed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (sermon_id) REFERENCES sermons(id) ON DELETE CASCADE,
+  UNIQUE(user_id, sermon_id)
+);
+
 CREATE TABLE IF NOT EXISTS sermons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
@@ -24,6 +47,7 @@ CREATE TABLE IF NOT EXISTS questions (
 CREATE TABLE IF NOT EXISTS quiz_sessions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   session_id TEXT NOT NULL UNIQUE,
+  user_id INTEGER NOT NULL DEFAULT 0,
   age_bracket TEXT NOT NULL CHECK(age_bracket IN ('junior', 'senior')),
   sermon_ids TEXT NOT NULL DEFAULT '',
   score INTEGER NOT NULL DEFAULT 0,
@@ -47,3 +71,5 @@ CREATE INDEX IF NOT EXISTS idx_questions_sermon ON questions(sermon_id);
 CREATE INDEX IF NOT EXISTS idx_questions_age ON questions(age_bracket);
 CREATE INDEX IF NOT EXISTS idx_sermons_age ON sermons(age_bracket);
 CREATE INDEX IF NOT EXISTS idx_quiz_sessions_session ON quiz_sessions(session_id);
+CREATE INDEX IF NOT EXISTS idx_study_progress_user ON study_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);

@@ -1,8 +1,29 @@
 export type AgeBracket = "junior" | "senior";
 
+export interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  branch: string;
+  phone: string;
+  email: string;
+  age_bracket: AgeBracket;
+  created_at: string;
+}
+
+export interface StudyProgress {
+  id: number;
+  user_id: number;
+  sermon_id: number;
+  completed: number;
+  completed_at: string | null;
+  created_at: string;
+}
+
 export interface Sermon {
   id: number;
   title: string;
+  slug: string;
   source_url: string;
   content: string;
   age_bracket: AgeBracket;
@@ -23,6 +44,7 @@ export interface Question {
 export interface QuizSession {
   id: number;
   session_id: string;
+  user_id: number;
   age_bracket: AgeBracket;
   sermon_ids: string;
   score: number;
