@@ -147,7 +147,7 @@ export function createDb(d1: D1Database | null) {
         create: async (session: Omit<QuizSession, "id" | "created_at">): Promise<QuizSession> => {
           await ensureSeeded();
           await _d1.prepare("INSERT INTO quiz_sessions (session_id, age_bracket, sermon_ids, score, total, completed_at, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))").bind(session.session_id, session.age_bracket, session.sermon_ids, session.score, session.total, session.completed_at).run();
-          return _d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(session.session_id).first<QuizSession>() || { ...session, id: Date.now(), created_at: new Date().toISOString() };
+          return (await _d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(session.session_id).first<QuizSession>()) || { ...session, id: Date.now(), created_at: new Date().toISOString() };
         },
         update: async (sessionId: string, updates: Partial<QuizSession>): Promise<QuizSession | undefined> => {
           await ensureSeeded();
@@ -171,7 +171,7 @@ export function createDb(d1: D1Database | null) {
         create: async (answer: Omit<QuizAnswer, "id">): Promise<QuizAnswer> => {
           await ensureSeeded();
           await _d1.prepare("INSERT INTO quiz_answers (session_id, question_id, selected_answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?)").bind(answer.session_id, answer.question_id, answer.selected_answer, answer.is_correct, answer.timestamp).run();
-          return _d1.prepare("SELECT * FROM quiz_answers WHERE rowid = last_insert_rowid()").first<QuizAnswer>() || { ...answer, id: Date.now() };
+          return (await _d1.prepare("SELECT * FROM quiz_answers WHERE rowid = last_insert_rowid()").first<QuizAnswer>()) || { ...answer, id: Date.now() };
         },
         getBySession: async (sessionId: string): Promise<QuizAnswer[]> => {
           await ensureSeeded();
