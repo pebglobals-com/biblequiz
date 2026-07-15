@@ -67,19 +67,20 @@ const SEED_QUESTIONS: { sermonIdx: number; question_text: string; options: strin
 export function createDb(d1: D1Database | null) {
   // D1-backed implementation
   if (d1) {
+    const _d1: D1Database = d1;
     let seeded = false;
     async function ensureSeeded() {
       if (seeded) return;
-      const existing = await d1.prepare("SELECT COUNT(*) as count FROM sermons").first<{ count: number }>();
+      const existing = await _d1.prepare("SELECT COUNT(*) as count FROM sermons").first<{ count: number }>();
       if (existing && existing.count > 0) { seeded = true; return; }
       seeded = true;
       for (const s of SEED_SERMONS) {
-        await d1.prepare("INSERT INTO sermons (title, source_url, content, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(s.title, s.source_url, s.content, s.age_bracket, s.category).run();
+        await _d1.prepare("INSERT INTO sermons (title, source_url, content, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(s.title, s.source_url, s.content, s.age_bracket, s.category).run();
       }
       for (const q of SEED_QUESTIONS) {
-        const row = await d1.prepare("SELECT id FROM sermons WHERE title = ?").bind(SEED_SERMONS[q.sermonIdx].title).first<{ id: number }>();
+        const row = await _d1.prepare("SELECT id FROM sermons WHERE title = ?").bind(SEED_SERMONS[q.sermonIdx].title).first<{ id: number }>();
         if (row) {
-          await d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(row.id, q.question_text, JSON.stringify(q.options), q.correct_answer, SEED_SERMONS[q.sermonIdx].age_bracket).run();
+          await _d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(row.id, q.question_text, JSON.stringify(q.options), q.correct_answer, SEED_SERMONS[q.sermonIdx].age_bracket).run();
         }
       }
     }
@@ -92,17 +93,17 @@ export function createDb(d1: D1Database | null) {
           const params: any[] = [];
           if (ageBracket) { sql += " WHERE age_bracket = ?"; params.push(ageBracket); }
           sql += " ORDER BY created_at DESC";
-          const { results } = await d1.prepare(sql).bind(...params).all<Sermon>();
+          const { results } = await _d1.prepare(sql).bind(...params).all<Sermon>();
           return results || [];
         },
         getById: async (id: number): Promise<Sermon | undefined> => {
           await ensureSeeded();
-          return d1.prepare("SELECT * FROM sermons WHERE id = ?").bind(id).first<Sermon>();
+          return _d1.prepare("SELECT * FROM sermons WHERE id = ?").bind(id).first<Sermon>();
         },
         create: async (sermon: Omit<Sermon, "id" | "created_at">): Promise<Sermon> => {
           await ensureSeeded();
-          const { success } = await d1.prepare("INSERT INTO sermons (title, source_url, content, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(sermon.title, sermon.source_url, sermon.content, sermon.age_bracket, sermon.category).run();
-          const row = await d1.prepare("SELECT * FROM sermons WHERE rowid = last_insert_rowid()").first<Sermon>();
+          const { success } = await _d1.prepare("INSERT INTO sermons (title, source_url, content, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(sermon.title, sermon.source_url, sermon.content, sermon.age_bracket, sermon.category).run();
+          const row = await _d1.prepare("SELECT * FROM sermons WHERE rowid = last_insert_rowid()").first<Sermon>();
           return row || { ...sermon, id: Date.now(), created_at: new Date().toISOString() };
         },
       },
@@ -118,18 +119,18 @@ export function createDb(d1: D1Database | null) {
             params.push(...sermonIds);
           }
           if (clauses.length > 0) sql += " WHERE " + clauses.join(" AND ");
-          const { results } = await d1.prepare(sql).bind(...params).all<any>();
+          const { results } = await _d1.prepare(sql).bind(...params).all<any>();
           return (results || []).map((r: any) => ({ ...r, options: typeof r.options === "string" ? JSON.parse(r.options) : r.options }));
         },
         getBySermon: async (sermonId: number): Promise<Question[]> => {
           await ensureSeeded();
-          const { results } = await d1.prepare("SELECT * FROM questions WHERE sermon_id = ?").bind(sermonId).all<any>();
+          const { results } = await _d1.prepare("SELECT * FROM questions WHERE sermon_id = ?").bind(sermonId).all<any>();
           return (results || []).map((r: any) => ({ ...r, options: typeof r.options === "string" ? JSON.parse(r.options) : r.options }));
         },
         create: async (question: Omit<Question, "id" | "created_at">): Promise<Question> => {
           await ensureSeeded();
-          await d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(question.sermon_id, question.question_text, JSON.stringify(question.options), question.correct_answer, question.age_bracket).run();
-          const row = await d1.prepare("SELECT * FROM questions WHERE rowid = last_insert_rowid()").first<any>();
+          await _d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(question.sermon_id, question.question_text, JSON.stringify(question.options), question.correct_answer, question.age_bracket).run();
+          const row = await _d1.prepare("SELECT * FROM questions WHERE rowid = last_insert_rowid()").first<any>();
           return { ...row, options: typeof row?.options === "string" ? JSON.parse(row.options) : row?.options || question.options };
         },
         createMany: async (items: Omit<Question, "id" | "created_at">[]): Promise<Question[]> => {
@@ -141,8 +142,8 @@ export function createDb(d1: D1Database | null) {
       quizSessions: {
         create: async (session: Omit<QuizSession, "id" | "created_at">): Promise<QuizSession> => {
           await ensureSeeded();
-          await d1.prepare("INSERT INTO quiz_sessions (session_id, age_bracket, sermon_ids, score, total, completed_at, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))").bind(session.session_id, session.age_bracket, session.sermon_ids, session.score, session.total, session.completed_at).run();
-          return d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(session.session_id).first<QuizSession>() || { ...session, id: Date.now(), created_at: new Date().toISOString() };
+          await _d1.prepare("INSERT INTO quiz_sessions (session_id, age_bracket, sermon_ids, score, total, completed_at, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))").bind(session.session_id, session.age_bracket, session.sermon_ids, session.score, session.total, session.completed_at).run();
+          return _d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(session.session_id).first<QuizSession>() || { ...session, id: Date.now(), created_at: new Date().toISOString() };
         },
         update: async (sessionId: string, updates: Partial<QuizSession>): Promise<QuizSession | undefined> => {
           await ensureSeeded();
@@ -153,36 +154,36 @@ export function createDb(d1: D1Database | null) {
           if (updates.completed_at !== undefined) { sets.push("completed_at = ?"); params.push(updates.completed_at); }
           if (sets.length > 0) {
             params.push(sessionId);
-            await d1.prepare(`UPDATE quiz_sessions SET ${sets.join(", ")} WHERE session_id = ?`).bind(...params).run();
+            await _d1.prepare(`UPDATE quiz_sessions SET ${sets.join(", ")} WHERE session_id = ?`).bind(...params).run();
           }
-          return d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(sessionId).first<QuizSession>();
+          return _d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(sessionId).first<QuizSession>();
         },
         getById: async (sessionId: string): Promise<QuizSession | undefined> => {
           await ensureSeeded();
-          return d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(sessionId).first<QuizSession>();
+          return _d1.prepare("SELECT * FROM quiz_sessions WHERE session_id = ?").bind(sessionId).first<QuizSession>();
         },
       },
       quizAnswers: {
         create: async (answer: Omit<QuizAnswer, "id">): Promise<QuizAnswer> => {
           await ensureSeeded();
-          await d1.prepare("INSERT INTO quiz_answers (session_id, question_id, selected_answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?)").bind(answer.session_id, answer.question_id, answer.selected_answer, answer.is_correct, answer.timestamp).run();
-          return d1.prepare("SELECT * FROM quiz_answers WHERE rowid = last_insert_rowid()").first<QuizAnswer>() || { ...answer, id: Date.now() };
+          await _d1.prepare("INSERT INTO quiz_answers (session_id, question_id, selected_answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?)").bind(answer.session_id, answer.question_id, answer.selected_answer, answer.is_correct, answer.timestamp).run();
+          return _d1.prepare("SELECT * FROM quiz_answers WHERE rowid = last_insert_rowid()").first<QuizAnswer>() || { ...answer, id: Date.now() };
         },
         getBySession: async (sessionId: string): Promise<QuizAnswer[]> => {
           await ensureSeeded();
-          const { results } = await d1.prepare("SELECT * FROM quiz_answers WHERE session_id = ?").bind(sessionId).all<QuizAnswer>();
+          const { results } = await _d1.prepare("SELECT * FROM quiz_answers WHERE session_id = ?").bind(sessionId).all<QuizAnswer>();
           return results || [];
         },
       },
       stats: {
         getCounts: async () => {
           await ensureSeeded();
-          const totalSermons = (await d1.prepare("SELECT COUNT(*) as c FROM sermons").first<{ c: number }>())?.c || 0;
-          const juniorSermons = (await d1.prepare("SELECT COUNT(*) as c FROM sermons WHERE age_bracket = 'junior'").first<{ c: number }>())?.c || 0;
-          const seniorSermons = (await d1.prepare("SELECT COUNT(*) as c FROM sermons WHERE age_bracket = 'senior'").first<{ c: number }>())?.c || 0;
-          const totalQuestions = (await d1.prepare("SELECT COUNT(*) as c FROM questions").first<{ c: number }>())?.c || 0;
-          const juniorQuestions = (await d1.prepare("SELECT COUNT(*) as c FROM questions WHERE age_bracket = 'junior'").first<{ c: number }>())?.c || 0;
-          const seniorQuestions = (await d1.prepare("SELECT COUNT(*) as c FROM questions WHERE age_bracket = 'senior'").first<{ c: number }>())?.c || 0;
+          const totalSermons = (await _d1.prepare("SELECT COUNT(*) as c FROM sermons").first<{ c: number }>())?.c || 0;
+          const juniorSermons = (await _d1.prepare("SELECT COUNT(*) as c FROM sermons WHERE age_bracket = 'junior'").first<{ c: number }>())?.c || 0;
+          const seniorSermons = (await _d1.prepare("SELECT COUNT(*) as c FROM sermons WHERE age_bracket = 'senior'").first<{ c: number }>())?.c || 0;
+          const totalQuestions = (await _d1.prepare("SELECT COUNT(*) as c FROM questions").first<{ c: number }>())?.c || 0;
+          const juniorQuestions = (await _d1.prepare("SELECT COUNT(*) as c FROM questions WHERE age_bracket = 'junior'").first<{ c: number }>())?.c || 0;
+          const seniorQuestions = (await _d1.prepare("SELECT COUNT(*) as c FROM questions WHERE age_bracket = 'senior'").first<{ c: number }>())?.c || 0;
           return { totalSermons, juniorSermons, seniorSermons, totalQuestions, juniorQuestions, seniorQuestions };
         },
       },
