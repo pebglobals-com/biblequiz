@@ -20,17 +20,18 @@ function ResultsContent() {
       setLoading(false);
       return;
     }
+    const sid: string = sessionId;
 
     async function fetchResults() {
       try {
-        const res = await fetch(`/api/quiz/submit?sessionId=${encodeURIComponent(sessionId)}`);
+        const res = await fetch(`/api/quiz/submit?sessionId=${encodeURIComponent(sid)}`);
         const result = await res.json();
         setData(result);
 
         const recRes = await fetch("/api/quiz/recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
+          body: JSON.stringify({ sessionId: sid }),
         });
         const recData = await recRes.json();
         setRecommendations(recData.recommendations || []);
