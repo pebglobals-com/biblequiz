@@ -204,7 +204,7 @@ export function createDb(d1: D1Database | null) {
           const existing = await _d1.prepare("SELECT * FROM study_progress WHERE user_id = ? AND sermon_id = ?").bind(entry.user_id, entry.sermon_id).first<StudyProgress>();
           if (existing) {
             await _d1.prepare("UPDATE study_progress SET completed = ?, completed_at = ? WHERE user_id = ? AND sermon_id = ?").bind(entry.completed, entry.completed ? new Date().toISOString() : null, entry.user_id, entry.sermon_id).run();
-            return _d1.prepare("SELECT * FROM study_progress WHERE user_id = ? AND sermon_id = ?").bind(entry.user_id, entry.sermon_id).first<StudyProgress>() || existing;
+            return (await _d1.prepare("SELECT * FROM study_progress WHERE user_id = ? AND sermon_id = ?").bind(entry.user_id, entry.sermon_id).first<StudyProgress>()) || existing;
           }
           await _d1.prepare("INSERT INTO study_progress (user_id, sermon_id, completed, completed_at, created_at) VALUES (?, ?, ?, ?, datetime('now'))").bind(entry.user_id, entry.sermon_id, entry.completed, entry.completed ? new Date().toISOString() : null).run();
           const row = await _d1.prepare("SELECT * FROM study_progress WHERE rowid = last_insert_rowid()").first<StudyProgress>();
