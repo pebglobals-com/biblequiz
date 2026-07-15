@@ -9,7 +9,7 @@ interface D1Result<T = unknown> {
 }
 interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
-  first<T = unknown>(col?: string): Promise<T | null>;
+  first<T = unknown>(col?: string): Promise<T | undefined>;
   run<T = unknown>(): Promise<D1Result<T>>;
   all<T = unknown>(): Promise<D1Result<T>>;
 }
