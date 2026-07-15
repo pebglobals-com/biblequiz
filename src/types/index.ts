@@ -44,7 +44,7 @@ export interface Question {
 export interface QuizSession {
   id: number;
   session_id: string;
-  user_id: number;
+  user_id?: number;
   age_bracket: AgeBracket;
   sermon_ids: string;
   score: number;
