@@ -135,7 +135,11 @@ export function createDb(d1: D1Database | null) {
         },
         createMany: async (items: Omit<Question, "id" | "created_at">[]): Promise<Question[]> => {
           const results: Question[] = [];
-          for (const q of items) results.push(await questions.create(q));
+          for (const q of items) {
+            await _d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(q.sermon_id, q.question_text, JSON.stringify(q.options), q.correct_answer, q.age_bracket).run();
+            const row = await _d1.prepare("SELECT * FROM questions WHERE rowid = last_insert_rowid()").first<any>();
+            results.push({ ...row, options: typeof row?.options === "string" ? JSON.parse(row.options) : row?.options || q.options });
+          }
           return results;
         },
       },
