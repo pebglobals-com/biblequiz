@@ -1,3 +1,7 @@
+export function toSlug(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 export function generateSessionId(): string {
   return `quiz_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }

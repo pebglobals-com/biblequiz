@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { categorizeContent, generateQuestions } from "@/lib/ai";
+import { toSlug } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,8 +51,16 @@ export async function POST(request: NextRequest) {
     }
 
     const categorized = await categorizeContent(content, ageBracket);
+
+    let slug = toSlug(categorized.title);
+    const existingSlugs = new Set(db.sermons.getAll().map((s) => s.slug));
+    if (existingSlugs.has(slug)) {
+      slug = `${slug}-${Date.now().toString(36)}`;
+    }
+
     const sermon = db.sermons.create({
       title: categorized.title,
+      slug,
       source_url: url || "",
       content: categorized.adjustedContent,
       age_bracket: ageBracket,
