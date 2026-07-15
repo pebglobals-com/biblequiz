@@ -1,4 +1,4 @@
-import type { Sermon, Question, QuizSession, QuizAnswer } from "./types";
+import type { Sermon, Question, QuizSession, QuizAnswer, User, StudyProgress } from "./types";
 
 // Declare D1Database type since @cloudflare/workers-types is not installed
 interface D1Result<T = unknown> {
@@ -24,6 +24,8 @@ const memSermons: Sermon[] = [];
 const memQuestions: Question[] = [];
 const memSessions: QuizSession[] = [];
 const memAnswers: QuizAnswer[] = [];
+const memUsers: User[] = [];
+const memProgress: StudyProgress[] = [];
 let memNextId: Record<string, number> = {};
 
 function memGetNextId(collection: string): number {
@@ -179,6 +181,36 @@ export function createDb(d1: D1Database | null) {
           return results || [];
         },
       },
+      users: {
+        create: async (user: Omit<User, "id" | "created_at">): Promise<User> => {
+          await ensureSeeded();
+          const { success } = await _d1.prepare("INSERT INTO users (first_name, last_name, branch, phone, email, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))").bind(user.first_name, user.last_name, user.branch, user.phone, user.email, user.age_bracket).run();
+          const row = await _d1.prepare("SELECT * FROM users WHERE rowid = last_insert_rowid()").first<User>();
+          return row || { ...user, id: Date.now(), created_at: new Date().toISOString() };
+        },
+        getById: async (id: number): Promise<User | undefined> => {
+          await ensureSeeded();
+          return _d1.prepare("SELECT * FROM users WHERE id = ?").bind(id).first<User>();
+        },
+      },
+      progress: {
+        getAll: async (userId: number): Promise<StudyProgress[]> => {
+          await ensureSeeded();
+          const { results } = await _d1.prepare("SELECT * FROM study_progress WHERE user_id = ?").bind(userId).all<StudyProgress>();
+          return results || [];
+        },
+        upsert: async (entry: { user_id: number; sermon_id: number; completed: number }): Promise<StudyProgress> => {
+          await ensureSeeded();
+          const existing = await _d1.prepare("SELECT * FROM study_progress WHERE user_id = ? AND sermon_id = ?").bind(entry.user_id, entry.sermon_id).first<StudyProgress>();
+          if (existing) {
+            await _d1.prepare("UPDATE study_progress SET completed = ?, completed_at = ? WHERE user_id = ? AND sermon_id = ?").bind(entry.completed, entry.completed ? new Date().toISOString() : null, entry.user_id, entry.sermon_id).run();
+            return _d1.prepare("SELECT * FROM study_progress WHERE user_id = ? AND sermon_id = ?").bind(entry.user_id, entry.sermon_id).first<StudyProgress>() || existing;
+          }
+          await _d1.prepare("INSERT INTO study_progress (user_id, sermon_id, completed, completed_at, created_at) VALUES (?, ?, ?, ?, datetime('now'))").bind(entry.user_id, entry.sermon_id, entry.completed, entry.completed ? new Date().toISOString() : null).run();
+          const row = await _d1.prepare("SELECT * FROM study_progress WHERE rowid = last_insert_rowid()").first<StudyProgress>();
+          return row || { ...entry, id: Date.now(), completed_at: entry.completed ? new Date().toISOString() : null, created_at: new Date().toISOString() };
+        },
+      },
       stats: {
         getCounts: async () => {
           await ensureSeeded();
@@ -295,6 +327,36 @@ export function createDb(d1: D1Database | null) {
       getBySession: async (sessionId: string): Promise<QuizAnswer[]> => {
         ensureMemSeeded();
         return memAnswers.filter((a) => a.session_id === sessionId);
+      },
+    },
+    users: {
+      create: async (user: Omit<User, "id" | "created_at">): Promise<User> => {
+        ensureMemSeeded();
+        const newUser: User = { ...user, id: memGetNextId("users"), created_at: new Date().toISOString() };
+        memUsers.push(newUser);
+        return newUser;
+      },
+      getById: async (id: number): Promise<User | undefined> => {
+        ensureMemSeeded();
+        return memUsers.find((u) => u.id === id);
+      },
+    },
+    progress: {
+      getAll: async (userId: number): Promise<StudyProgress[]> => {
+        ensureMemSeeded();
+        return memProgress.filter((p) => p.user_id === userId);
+      },
+      upsert: async (entry: { user_id: number; sermon_id: number; completed: number }): Promise<StudyProgress> => {
+        ensureMemSeeded();
+        const existing = memProgress.find((p) => p.user_id === entry.user_id && p.sermon_id === entry.sermon_id);
+        if (existing) {
+          existing.completed = entry.completed;
+          existing.completed_at = entry.completed ? new Date().toISOString() : null;
+          return existing;
+        }
+        const newEntry: StudyProgress = { ...entry, id: memGetNextId("progress"), completed_at: entry.completed ? new Date().toISOString() : null, created_at: new Date().toISOString() };
+        memProgress.push(newEntry);
+        return newEntry;
       },
     },
     stats: {

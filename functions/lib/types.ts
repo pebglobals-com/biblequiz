@@ -40,6 +40,26 @@ export interface QuizAnswer {
   timestamp: string;
 }
 
+export interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  branch: string;
+  phone: string;
+  email: string;
+  age_bracket: AgeBracket;
+  created_at: string;
+}
+
+export interface StudyProgress {
+  id: number;
+  user_id: number;
+  sermon_id: number;
+  completed: number;
+  completed_at: string | null;
+  created_at: string;
+}
+
 export interface Recommendation {
   topic: string;
   reason: string;

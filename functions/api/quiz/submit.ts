@@ -14,8 +14,9 @@ export async function onRequestGet({ request, env }: { request: Request; env: an
     }
     const answers = await db.quizAnswers.getBySession(sessionId);
     const allQuestions = await db.questions.getAll();
-    const results = answers.map((a: any) => {
+    const results = await Promise.all(answers.map(async (a: any) => {
       const q = allQuestions.find((qq: any) => qq.id === a.question_id);
+      const s = q ? await db.sermons.getById(q.sermon_id) : undefined;
       let isCorrect = a.is_correct;
       if (typeof isCorrect === "number") isCorrect = isCorrect === 1 ? true : isCorrect === 0 ? false : null;
       return {
@@ -25,9 +26,9 @@ export async function onRequestGet({ request, env }: { request: Request; env: an
         correct_answer: q?.correct_answer || "",
         selected_answer: a.selected_answer,
         is_correct: isCorrect,
-        sermon_title: "Unknown",
+        sermon_title: s?.title || "Unknown",
       };
-    });
+    }));
     return new Response(JSON.stringify({ sessionId, score: session.score, total: session.total, results }), {
       headers: { "Content-Type": "application/json" },
     });
