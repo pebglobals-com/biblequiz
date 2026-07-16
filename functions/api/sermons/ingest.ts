@@ -1,4 +1,4 @@
-import { createDb } from "../../lib/db";
+import { createDb, toSlug } from "../../lib/db";
 import { categorizeContent, generateQuestions } from "../../lib/ai";
 
 export async function onRequestPost({ request, env }: { request: Request; env: any }) {
@@ -37,6 +37,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
     const categorized = await categorizeContent(content, ageBracket, apiKey);
     const sermon = await db.sermons.create({
       title: categorized.title,
+      slug: toSlug(categorized.title),
       source_url: url || "",
       content: categorized.adjustedContent,
       age_bracket: ageBracket,

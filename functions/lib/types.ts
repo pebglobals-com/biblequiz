@@ -3,6 +3,7 @@ export type AgeBracket = "junior" | "senior";
 export interface Sermon {
   id: number;
   title: string;
+  slug: string;
   source_url: string;
   content: string;
   age_bracket: AgeBracket;
