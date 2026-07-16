@@ -14,73 +14,95 @@ const verses = [
 ];
 
 const features = [
-  { emoji: "\uD83D\uDCD6", title: "Study Sermons", desc: "Read and understand God\u2019s Word through age-appropriate sermons and articles." },
-  { emoji: "\u2753", title: "Practice Questions", desc: "Test your knowledge on each topic with curated Q&A sessions." },
-  { emoji: "\uD83C\uDFAF", title: "Smart Quiz", desc: "Challenge yourself with AI-powered quizzes tailored to your learning." },
-  { emoji: "\uD83D\uDCCA", title: "Track Progress", desc: "See your growth journey with detailed stats and achievements." },
+  {
+    id: "quiz",
+    title: "Smart Quiz",
+    desc: "Challenge yourself with AI-powered quizzes tailored to your learning pace and knowledge level.",
+    featured: true,
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+      </svg>
+    ),
+  },
+  {
+    id: "study",
+    title: "Study Sermons",
+    desc: "Read and understand God's Word through age-appropriate sermons and articles.",
+    featured: false,
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+      </svg>
+    ),
+  },
+  {
+    id: "practice",
+    title: "Practice Questions",
+    desc: "Test your knowledge on each topic with curated Q&A sessions for all skill levels.",
+    featured: false,
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+      </svg>
+    ),
+  },
+  {
+    id: "progress",
+    title: "Track Progress",
+    desc: "See your growth journey with detailed stats, achievements, and personalized insights.",
+    featured: false,
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
+    ),
+  },
 ];
 
-function Particles() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+function VerseCarousel() {
+  const [verseIndex, setVerseIndex] = useState(0);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; alpha: number; speed: number }[] = [];
-    let animId: number;
-
-    function resize() {
-      if (!canvas) return;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    const count = Math.min(60, Math.floor(window.innerWidth / 20));
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        size: Math.random() * 2 + 1,
-        alpha: Math.random() * 0.4 + 0.1,
-        speed: Math.random() * 0.3 + 0.1,
-      });
-    }
-
-    function draw() {
-      if (!ctx || !canvas) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(99, 102, 241, ${p.alpha})`;
-        ctx.fill();
-      }
-      animId = requestAnimationFrame(draw);
-    }
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-    };
+    const t = setInterval(() => setVerseIndex((p) => (p + 1) % verses.length), 6000);
+    return () => clearInterval(t);
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 -z-10 pointer-events-none" />;
+  return (
+    <div className="w-full bg-brand-50/50 border-b border-surface-border">
+      <div className="max-w-3xl mx-auto px-4 py-3 text-center">
+        <div className="relative h-16 overflow-hidden">
+          {verses.map((v, i) => (
+            <div
+              key={i}
+              className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ease-out"
+              style={{
+                opacity: i === verseIndex ? 1 : 0,
+                transform: `translateY(${i === verseIndex ? 0 : i < verseIndex ? -12 : 12}px)`,
+              }}
+            >
+              <p className="font-display text-sm sm:text-base text-ink-muted italic leading-relaxed px-4 text-balance">
+                &ldquo;{v.text}&rdquo;
+              </p>
+              <p className="text-xs text-accent-500 mt-0.5 font-semibold">&mdash; {v.ref}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-center gap-1.5 mt-1">
+          {verses.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setVerseIndex(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === verseIndex ? "w-4 bg-brand-400" : "w-1.5 bg-surface-border hover:bg-ink-light"
+              }`}
+              aria-label={`Verse ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function FeatureCard({ f, i }: { f: typeof features[0]; i: number }) {
@@ -98,221 +120,208 @@ function FeatureCard({ f, i }: { f: typeof features[0]; i: number }) {
     return () => observer.disconnect();
   }, []);
 
+  if (f.featured) {
+    return (
+      <div
+        ref={ref}
+        className="card-featured p-8 relative overflow-hidden"
+        style={{ animation: visible ? "fadeInUp 0.3s ease-out forwards" : "none", opacity: visible ? 1 : 0 }}
+      >
+        <div className="absolute top-0 right-0">
+          <span className="inline-block bg-brand-500 text-white text-[11px] font-semibold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+            Featured
+          </span>
+        </div>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center">
+            {f.icon}
+          </div>
+          <h3 className="font-display text-xl font-bold text-ink">{f.title}</h3>
+        </div>
+        <p className="text-ink-muted text-sm leading-relaxed">{f.desc}</p>
+      </div>
+    );
+  }
+
+  if (f.id === "progress") {
+    return (
+      <div
+        ref={ref}
+        className="card-base p-8"
+        style={{ animation: visible ? "fadeInUp 0.3s ease-out forwards" : "none", opacity: visible ? 1 : 0, animationDelay: `${i * 100}ms` }}
+      >
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-amber-50 text-accent-500 flex items-center justify-center">
+            {f.icon}
+          </div>
+          <h3 className="font-display text-xl font-bold text-ink">{f.title}</h3>
+        </div>
+        <p className="text-ink-muted text-sm leading-relaxed mb-5">{f.desc}</p>
+        <div className="space-y-3">
+          <div>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="text-ink-muted">Quiz completion</span>
+              <span className="text-brand-600 font-semibold">78%</span>
+            </div>
+            <div className="h-2 bg-brand-100 rounded-full overflow-hidden">
+              <div className="h-full w-[78%] bg-gradient-to-r from-brand-400 to-brand-600 rounded-full" />
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="text-ink-muted">Lessons done</span>
+              <span className="text-accent-500 font-semibold">12/15</span>
+            </div>
+            <div className="h-2 bg-amber-100 rounded-full overflow-hidden">
+              <div className="h-full w-4/5 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={ref}
-      className={`group relative glass rounded-2xl p-8 border border-white/5 hover:border-bible-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-bible-500/10 ${
-        visible ? "animate-in" : "opacity-0"
-      }`}
-      style={{ animationDelay: `${i * 100}ms`, animationFillMode: "forwards" }}
+      className="card-hover p-8"
+      style={{ animation: visible ? "fadeInUp 0.3s ease-out forwards" : "none", opacity: visible ? 1 : 0, animationDelay: `${i * 100}ms` }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-bible-500/0 via-purple-500/0 to-bible-500/0 group-hover:from-bible-500/5 group-hover:via-purple-500/5 group-hover:to-bible-500/5 rounded-2xl transition-all duration-500" />
-      <div className="relative">
-        <div className="text-4xl mb-5 group-hover:scale-110 transition-transform duration-300 inline-block">
-          {f.emoji}
+      <div className="flex items-center gap-4 mb-4">
+        <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+          {f.icon}
         </div>
-        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-bible-300 transition-colors">
-          {f.title}
-        </h3>
-        <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+        <h3 className="font-display text-xl font-bold text-ink">{f.title}</h3>
       </div>
+      <p className="text-ink-muted text-sm leading-relaxed">{f.desc}</p>
     </div>
   );
 }
 
 export default function Home() {
-  const [verseIndex, setVerseIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVerseIndex((prev) => (prev + 1) % verses.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <Particles />
-
-      {/* Animated gradient mesh background */}
-      <div className="fixed inset-0 -z-20">
-        <div className="absolute inset-0 bg-[#0b1120]" />
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-radial from-bible-500/20 via-bible-600/10 to-transparent blur-3xl animate-pulse-glow" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-radial from-purple-500/20 via-purple-600/10 to-transparent blur-3xl animate-pulse-glow" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full bg-gradient-radial from-amber-500/10 via-transparent to-transparent blur-3xl animate-float-slow" />
-        <div className="absolute inset-0 bg-dots opacity-40" />
+    <div className="relative min-h-screen">
+      {/* Background */}
+      <div className="fixed inset-0 -z-10 bg-surface">
+        <div className="absolute inset-0 bg-dots-light" />
+        <div className="absolute top-0 left-0 right-0 h-[600px] bg-gradient-glow" />
       </div>
 
-      {/* Floating Bible illustration */}
-      <div className="absolute top-[12%] right-[8%] hidden xl:block animate-float-slow">
-        <div className="relative w-48 h-56" style={{ perspective: "800px" }}>
-          <div className="absolute inset-0 bg-gradient-to-br from-bible-500/30 to-purple-500/30 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl" style={{ transform: "rotateY(-15deg)" }} />
-          <div className="absolute inset-[2px] bg-gradient-to-br from-bible-600/20 to-purple-600/20 rounded-2xl backdrop-blur-xl flex items-center justify-center" style={{ transform: "rotateY(-15deg)" }}>
-            <div className="relative w-24 h-32">
-              <div className="absolute inset-0 flex">
-                <div className="w-1/2 h-full bg-gradient-to-r from-bible-400/40 to-bible-500/40 rounded-l-md border-r border-white/10" />
-                <div className="w-1/2 h-full bg-gradient-to-l from-bible-400/40 to-bible-500/40 rounded-r-md" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <svg className="w-12 h-14 text-gold-400/70" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M2 2h6a4 4 0 014 4v12a4 4 0 00-4-4H2V2zm10 4a4 4 0 014-4h6v12h-6a4 4 0 00-4 4V6z" />
-                </svg>
-              </div>
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-bible-300/50 to-bible-400/50 rounded-full" />
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gold-400/30 rounded-full" />
-            </div>
-          </div>
-          <div className="absolute -bottom-2 -right-2 w-24 h-32 bg-gradient-to-br from-bible-500/15 to-purple-500/15 rounded-2xl backdrop-blur-xl border border-white/5" style={{ transform: "rotateY(5deg) translateZ(-10px)" }} />
-        </div>
-      </div>
-
-      {/* Floating cross decoration */}
-      <div className="absolute top-[25%] left-[8%] hidden xl:block animate-float" style={{ animationDuration: "8s" }}>
-        <div className="w-16 h-24 relative opacity-30">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-16 bg-gradient-to-b from-bible-400/40 to-transparent rounded-full" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 w-10 h-2 bg-gradient-to-r from-bible-400/40 to-transparent rounded-full" />
-        </div>
-      </div>
-
-      {/* Scripture verse carousel */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 max-w-2xl mx-auto px-4 w-full">
-        <div className="glass rounded-2xl px-6 py-4 text-center border border-white/10 shadow-xl">
-          <div className="relative h-20 overflow-hidden">
-            {verses.map((v, i) => (
-              <div
-                key={i}
-                className="absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 ease-in-out"
-                style={{
-                  opacity: i === verseIndex ? 1 : 0,
-                  transform: `translateY(${i === verseIndex ? 0 : i < verseIndex ? -20 : 20}px)`,
-                }}
-              >
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed italic px-4">
-                  &ldquo;{v.text}&rdquo;
-                </p>
-                <p className="text-xs text-amber-400 mt-1 font-semibold">&mdash; {v.ref}</p>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-center gap-1.5 mt-2">
-            {verses.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setVerseIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  i === verseIndex ? "bg-bible-400 w-4" : "bg-gray-600 hover:bg-gray-500"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Verse carousel */}
+      <VerseCarousel />
 
       {/* Hero section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 pt-24 pb-20">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 text-sm text-gray-400 animate-in">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+      <section className="relative px-4 pt-16 sm:pt-24 pb-16 sm:pb-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50 border border-brand-100 text-sm text-brand-700">
+            <span className="w-2 h-2 rounded-full bg-accent-500" />
             Interactive Bible Learning Platform
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 tracking-tight leading-tight animate-in">
-            <span className="bg-gradient-to-r from-bible-400 via-amber-400 to-bible-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-x">
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold mb-5 tracking-tight leading-[1.1] text-balance">
+            <span className="bg-gradient-to-r from-brand-700 via-accent-500 to-brand-700 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-x">
               Bible Quiz Guide
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-in" style={{ animationDelay: "150ms", animationFillMode: "forwards" }}>
+          <p className="text-lg sm:text-xl text-ink-muted max-w-xl mx-auto mb-10 leading-relaxed text-balance">
             Study. Learn. Grow in Faith.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center animate-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/signup"
-              className="group relative px-10 py-5 bg-gradient-to-r from-bible-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl shadow-bible-600/30 hover:shadow-bible-600/50 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden"
+              className="btn-primary group text-base"
             >
-              <span className="relative z-10 flex items-center gap-3">
-                Get Started
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-[20deg] translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+              <span>Get Started</span>
+              <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </Link>
 
             <button
               onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-              className="px-10 py-5 glass border border-white/10 text-gray-300 font-semibold text-lg rounded-2xl hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300"
+              className="btn-secondary text-base"
             >
-              <span className="flex items-center gap-3">
-                Learn More
-                <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              </span>
+              <span>Learn More</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
             </button>
           </div>
         </div>
-
-        {/* Bottom gradient fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0b1120] to-transparent" />
       </section>
 
       {/* Features section */}
-      <section id="features" className="relative py-24 px-4">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bible-900/10 to-transparent" />
-        <div className="max-w-7xl mx-auto relative">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4">
+      <section id="features" className="relative py-16 sm:py-24 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-ink mb-4 text-balance">
               Everything You Need to{" "}
-              <span className="bg-gradient-to-r from-bible-400 to-purple-400 bg-clip-text text-transparent">Grow</span>
+              <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Grow</span>
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+            <p className="text-ink-muted max-w-xl mx-auto text-base sm:text-lg">
               A complete Bible study experience designed for both juniors and seniors
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, i) => (
-              <FeatureCard key={i} f={f} i={i} />
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {features.slice(0, 2).map((f, i) => (
+                <FeatureCard key={f.id} f={f} i={i} />
+              ))}
+              <div className="sm:col-span-2">
+                <FeatureCard f={features[2]} i={2} />
+              </div>
+            </div>
+            <div>
+              <FeatureCard f={features[3]} i={3} />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Stats section */}
-      <section className="relative py-20 px-4">
+      <section className="relative py-16 sm:py-20 px-4">
+        <div className="absolute inset-0 bg-brand-50/60 -z-10" />
         <div className="max-w-4xl mx-auto">
-          <div className="glass rounded-3xl p-10 border border-white/5 text-center">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-              {[
-                { number: "8+", label: "Study Topics" },
-                { number: "18+", label: "Quiz Questions" },
-                { number: "2", label: "Age Categories" },
-              ].map((stat, i) => (
-                <div key={i} className="animate-in" style={{ animationDelay: `${i * 100}ms`, animationFillMode: "forwards" }}>
-                  <div className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-bible-400 to-purple-400 bg-clip-text text-transparent mb-1">
-                    {stat.number}
-                  </div>
-                  <div className="text-gray-400 text-sm">{stat.label}</div>
+          <div className="text-center mb-10">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink">Built for Growth</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {[
+              { number: "8+", label: "Study Topics", color: "from-brand-500 to-brand-600" },
+              { number: "18+", label: "Quiz Questions", color: "from-accent-500 to-accent-600" },
+              { number: "2", label: "Age Categories", color: "from-brand-600 to-accent-500" },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl border border-surface-border p-8 text-center shadow-sm hover:shadow-md transition-shadow duration-300"
+                style={{ animation: `fadeInUp 0.3s ease-out forwards`, animationDelay: `${i * 100}ms`, opacity: 0 }}
+              >
+                <div className={`text-4xl sm:text-5xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2 font-display`}>
+                  {stat.number}
                 </div>
-              ))}
-            </div>
+                <div className="text-ink-muted text-sm font-medium">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative py-10 px-4 border-t border-white/5">
+      <footer className="py-10 px-4 border-t border-surface-border">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="text-2xl">📖</span>
-            <span className="text-xl font-bold">
-              <span className="bg-gradient-to-r from-bible-400 to-purple-400 bg-clip-text text-transparent">Bible Quiz</span>
-              <span className="text-gray-500"> Guide</span>
+            <svg className="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+            <span className="font-display text-xl font-bold">
+              <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Bible Quiz</span>
+              <span className="text-ink-light"> Guide</span>
             </span>
           </div>
-          <p className="text-gray-500 text-sm">&copy; {new Date().getFullYear()} Bible Quiz Guide. Study. Learn. Grow in Faith.</p>
+          <p className="text-ink-light text-sm">&copy; {new Date().getFullYear()} Bible Quiz Guide. Study. Learn. Grow in Faith.</p>
         </div>
       </footer>
     </div>

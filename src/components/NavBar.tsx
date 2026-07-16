@@ -22,17 +22,21 @@ export default function NavBar() {
   ];
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${
-      scrolled
-        ? "glass-strong border-b border-white/10 shadow-lg shadow-black/10"
-        : "bg-transparent border-b border-transparent"
-    }`}>
+    <nav
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/90 backdrop-blur-md border-b border-surface-border shadow-sm"
+          : "bg-surface border-b border-transparent"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <span className="text-2xl group-hover:scale-110 transition-transform duration-300">📖</span>
-          <span className="text-xl font-bold hidden sm:block">
-            <span className="bg-gradient-to-r from-bible-400 to-purple-400 bg-clip-text text-transparent">Bible Quiz</span>
-            <span className="text-gray-500"> Guide</span>
+          <svg className="w-7 h-7 text-brand-500 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+          <span className="text-lg font-bold hidden sm:block">
+            <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Bible Quiz</span>
+            <span className="text-ink-light"> Guide</span>
           </span>
         </Link>
         <div className="flex items-center gap-1">
@@ -44,8 +48,8 @@ export default function NavBar() {
                 href={link.href}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-bible-500 to-purple-500 text-white shadow-lg shadow-bible-500/30"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
+                    ? "bg-brand-600 text-white shadow-sm"
+                    : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"
                 }`}
               >
                 {link.label}
