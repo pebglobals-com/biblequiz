@@ -7,3 +7,7 @@ binding = "DB"
 database_name = "bible-quiz-db"
 database_id = "6c2d9b83-23b3-4f0a-9457-d9f8942be1eb"
 migrations_dir = "wrangler/migrations"
+
+# Email verification via Resend — set via `npx wrangler pages secret put RESEND_API_KEY`
+# [vars]
+# RESEND_API_KEY = "re_..."

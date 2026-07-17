@@ -18,6 +18,7 @@ export default function NavBar() {
 
   const links = [
     { href: "/", label: "Home" },
+    { href: "/signin", label: "Sign In" },
     { href: "/signup", label: "Sign Up" },
   ];
 

@@ -266,17 +266,12 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {features.slice(0, 2).map((f, i) => (
-                <FeatureCard key={f.id} f={f} i={i} />
-              ))}
-              <div className="sm:col-span-2">
-                <FeatureCard f={features[2]} i={2} />
-              </div>
+            <div className="lg:col-span-3">
+              <FeatureCard f={features[0]} i={0} />
             </div>
-            <div>
-              <FeatureCard f={features[3]} i={3} />
-            </div>
+            {features.slice(1).map((f, i) => (
+              <FeatureCard key={f.id} f={f} i={i + 1} />
+            ))}
           </div>
         </div>
       </section>

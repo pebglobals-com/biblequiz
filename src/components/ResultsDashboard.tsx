@@ -38,7 +38,7 @@ export default function ResultsDashboard({
   const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
 
   function getGrade() {
-    if (percentage >= 90) return { label: "Excellent!", color: "text-emerald-600 dark:text-emerald-400", bg: "from-emerald-500 to-green-500" };
+    if (percentage >= 90) return { label: "Excellent!", color: "text-green-700 dark:text-emerald-400", bg: "from-emerald-500 to-green-700" };
     if (percentage >= 70) return { label: "Good Job!", color: "text-blue-600 dark:text-blue-400", bg: "from-blue-500 to-purple-500" };
     if (percentage >= 50) return { label: "Keep Trying!", color: "text-amber-600 dark:text-amber-400", bg: "from-amber-500 to-orange-500" };
     return { label: "Study More!", color: "text-red-600 dark:text-red-400", bg: "from-red-500 to-rose-500" };
@@ -128,7 +128,7 @@ export default function ResultsDashboard({
 
         <div className="grid grid-cols-3 gap-4 text-center mb-6">
           <div className="rounded-xl p-4 bg-gradient-to-b from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200 dark:border-emerald-800">
-            <p className="text-3xl font-extrabold text-emerald-600">{score}</p>
+            <p className="text-3xl font-extrabold text-green-700">{score}</p>
             <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Correct</p>
           </div>
           <div className="rounded-xl p-4 bg-gradient-to-b from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200 dark:border-red-800">
@@ -183,12 +183,12 @@ export default function ResultsDashboard({
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Topic: {r.sermon_title}</p>
                   <div className="mt-2 text-sm">
                     {r.selected_answer ? (
-                      <p>Your answer: <span className={r.is_correct ? "text-emerald-600 font-medium" : "text-red-600 font-medium line-through"}>{r.selected_answer}</span></p>
+                      <p>Your answer: <span className={r.is_correct ? "text-green-700 font-medium" : "text-red-600 font-medium line-through"}>{r.selected_answer}</span></p>
                     ) : (
                       <p className="text-orange-600 font-medium">No answer (time expired)</p>
                     )}
                     {r.is_correct !== true && (
-                      <p className="text-emerald-600 font-medium mt-0.5">Correct answer: {r.correct_answer}</p>
+                      <p className="text-green-700 font-medium mt-0.5">Correct answer: {r.correct_answer}</p>
                     )}
                   </div>
                 </div>

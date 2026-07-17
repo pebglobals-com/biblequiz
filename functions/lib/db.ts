@@ -195,15 +195,32 @@ export function createDb(d1: D1Database | null) {
         },
       },
       users: {
-        create: async (user: Omit<User, "id" | "created_at">): Promise<User> => {
+        create: async (user: Omit<User, "id" | "created_at"> & { email_verified?: number; verification_token?: string | null }): Promise<User> => {
           await ensureSeeded();
-          const { success } = await _d1.prepare("INSERT INTO users (first_name, last_name, branch, phone, email, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))").bind(user.first_name, user.last_name, user.branch, user.phone, user.email, user.age_bracket).run();
-          const row = await _d1.prepare("SELECT * FROM users WHERE rowid = last_insert_rowid()").first<User>();
-          return row || { ...user, id: Date.now(), created_at: new Date().toISOString() };
+          await _d1.prepare("INSERT INTO users (first_name, last_name, branch, phone, email, age_bracket, email_verified, verification_token, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))").bind(user.first_name, user.last_name, user.branch, user.phone, user.email, user.age_bracket, user.email_verified ?? 0, user.verification_token ?? null).run();
+          return (await _d1.prepare("SELECT * FROM users WHERE rowid = last_insert_rowid()").first<User>())!;
         },
         getById: async (id: number): Promise<User | undefined> => {
           await ensureSeeded();
           return _d1.prepare("SELECT * FROM users WHERE id = ?").bind(id).first<User>();
+        },
+        findByEmail: async (email: string): Promise<User | undefined> => {
+          await ensureSeeded();
+          return _d1.prepare("SELECT * FROM users WHERE email = ?").bind(email).first<User>();
+        },
+        findByVerificationToken: async (token: string): Promise<User | undefined> => {
+          await ensureSeeded();
+          return _d1.prepare("SELECT * FROM users WHERE verification_token = ?").bind(token).first<User>();
+        },
+        updateVerification: async (userId: number): Promise<User | undefined> => {
+          await ensureSeeded();
+          await _d1.prepare("UPDATE users SET email_verified = 1, verification_token = NULL WHERE id = ?").bind(userId).run();
+          return _d1.prepare("SELECT * FROM users WHERE id = ?").bind(userId).first<User>();
+        },
+        setToken: async (userId: number, token: string): Promise<User | undefined> => {
+          await ensureSeeded();
+          await _d1.prepare("UPDATE users SET verification_token = ? WHERE id = ?").bind(token, userId).run();
+          return _d1.prepare("SELECT * FROM users WHERE id = ?").bind(userId).first<User>();
         },
       },
       progress: {
@@ -347,15 +364,40 @@ export function createDb(d1: D1Database | null) {
       },
     },
     users: {
-      create: async (user: Omit<User, "id" | "created_at">): Promise<User> => {
+      create: async (user: Omit<User, "id" | "created_at"> & { email_verified?: number; verification_token?: string | null }): Promise<User> => {
         ensureMemSeeded();
-        const newUser: User = { ...user, id: memGetNextId("users"), created_at: new Date().toISOString() };
+        const newUser: User = { ...user, id: memGetNextId("users"), email_verified: user.email_verified ?? 0, verification_token: user.verification_token ?? null, created_at: new Date().toISOString() } as User;
         memUsers.push(newUser);
         return newUser;
       },
       getById: async (id: number): Promise<User | undefined> => {
         ensureMemSeeded();
         return memUsers.find((u) => u.id === id);
+      },
+      findByEmail: async (email: string): Promise<User | undefined> => {
+        ensureMemSeeded();
+        return memUsers.find((u) => u.email === email);
+      },
+      findByVerificationToken: async (token: string): Promise<User | undefined> => {
+        ensureMemSeeded();
+        return memUsers.find((u) => u.verification_token === token);
+      },
+      updateVerification: async (userId: number): Promise<User | undefined> => {
+        ensureMemSeeded();
+        const user = memUsers.find((u) => u.id === userId);
+        if (user) {
+          user.email_verified = 1;
+          user.verification_token = null;
+        }
+        return user;
+      },
+      setToken: async (userId: number, token: string): Promise<User | undefined> => {
+        ensureMemSeeded();
+        const user = memUsers.find((u) => u.id === userId);
+        if (user) {
+          user.verification_token = token;
+        }
+        return user;
       },
     },
     progress: {
