@@ -1,7 +1,8 @@
 import JuniorQuestionsClient from "./client";
+import { SermonData } from "@/lib/mockData";
 
 export function generateStaticParams() {
-  return [{ sermonId: "placeholder" }];
+  return SermonData.filter((s) => s.age_bracket === "junior").map((s) => ({ sermonId: String(s.id) }));
 }
 
 export default async function JuniorQuestionsPage({ params }: { params: Promise<{ sermonId: string }> }) {
