@@ -1,5 +1,12 @@
 {
   "version": 1,
-  "include": ["/api/*", "/verify", "/junior/test"],
+  "include": [
+    "/api/*",
+    "/verify",
+    "/junior/sermons/*",
+    "/junior/questions/*",
+    "/senior/sermons/*",
+    "/senior/questions/*"
+  ],
   "exclude": []
 }
