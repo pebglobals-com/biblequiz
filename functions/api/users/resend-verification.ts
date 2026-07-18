@@ -35,7 +35,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
     try {
       const resend = new Resend(env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "Bible Quiz <noreply@biblequizguide.com>",
+        from: "Bible Quiz <noreply@talent-loop.org>",
         to: email,
         subject: "Resend: Verify your email - Bible Quiz Guide",
         html: `
