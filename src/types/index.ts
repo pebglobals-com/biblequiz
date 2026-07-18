@@ -18,6 +18,7 @@ export interface StudyProgress {
   user_id: number;
   sermon_id: number;
   completed: number;
+  questions_done: number;
   completed_at: string | null;
   created_at: string;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface SermonData {
   id: number;
@@ -21,10 +22,20 @@ interface QuestionData {
 }
 
 export default function JuniorQuestionsClient({ sermonId: sermonIdStr }: { sermonId: string }) {
+  const router = useRouter();
   const sermonId = parseInt(sermonIdStr);
+  const [userId, setUserId] = useState<number | null>(null);
   const [sermon, setSermon] = useState<SermonData | null>(null);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
+  const [questionsDone, setQuestionsDone] = useState(false);
+  const [markingDone, setMarkingDone] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const uid = localStorage.getItem("userId");
+    if (!uid) { router.push("/signup"); return; }
+    setUserId(Number(uid));
+  }, [router]);
 
   useEffect(() => {
     async function load() {
@@ -44,8 +55,33 @@ export default function JuniorQuestionsClient({ sermonId: sermonIdStr }: { sermo
         setLoading(false);
       }
     }
-    load();
-  }, [sermonId]);
+    if (userId) load();
+  }, [sermonId, userId]);
+
+  useEffect(() => {
+    if (!userId || !sermon) return;
+    fetch(`/api/users/${userId}/progress`).then(r => r.json()).then(data => {
+      const prog = (data.progress || []).find((p: any) => p.sermon_id === sermon.id);
+      if (prog?.questions_done) setQuestionsDone(true);
+    }).catch(() => {});
+  }, [userId, sermon]);
+
+  async function markQuestionsDone() {
+    if (!userId || !sermon || markingDone) return;
+    setMarkingDone(true);
+    try {
+      const res = await fetch(`/api/users/${userId}/progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sermonId: sermon.id, questionsDone: 1 }),
+      });
+      if (res.ok) setQuestionsDone(true);
+    } catch (err) {
+      console.error("Failed to mark questions done:", err);
+    } finally {
+      setMarkingDone(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -199,25 +235,50 @@ export default function JuniorQuestionsClient({ sermonId: sermonIdStr }: { sermo
         )}
 
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link 
-              href={`/junior/sermons/${sermon.slug}`}
+              href={`/junior/sermons/${sermon.slug}/study`}
               className="btn-secondary px-8 py-3 text-center"
             >
               <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Read the Article
+              Read the Sermon
             </Link>
-            <Link 
-              href="/junior/quiz"
-              className="btn-primary px-8 py-3 text-center"
-            >
-              <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Take a Quiz
-            </Link>
+            {questionsDone ? (
+              <Link 
+                href={`/quiz/play?age=junior&ids=${sermon.id}`}
+                className="btn-primary px-8 py-3 text-center"
+              >
+                <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Take Quiz
+              </Link>
+            ) : (
+              <button
+                onClick={markQuestionsDone}
+                disabled={markingDone}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {markingDone ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Saving...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    I&apos;ve Studied These
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </main>

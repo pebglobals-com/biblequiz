@@ -1,0 +1,1 @@
+ALTER TABLE study_progress ADD COLUMN questions_done INTEGER NOT NULL DEFAULT 0;

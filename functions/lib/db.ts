@@ -229,16 +229,31 @@ export function createDb(d1: D1Database | null) {
           const { results } = await _d1.prepare("SELECT * FROM study_progress WHERE user_id = ?").bind(userId).all<StudyProgress>();
           return results || [];
         },
-        upsert: async (entry: { user_id: number; sermon_id: number; completed: number }): Promise<StudyProgress> => {
+        upsert: async (entry: { user_id: number; sermon_id: number; completed: number; questions_done?: number }): Promise<StudyProgress> => {
           await ensureSeeded();
           const existing = await _d1.prepare("SELECT * FROM study_progress WHERE user_id = ? AND sermon_id = ?").bind(entry.user_id, entry.sermon_id).first<StudyProgress>();
           if (existing) {
-            await _d1.prepare("UPDATE study_progress SET completed = ?, completed_at = ? WHERE user_id = ? AND sermon_id = ?").bind(entry.completed, entry.completed ? new Date().toISOString() : null, entry.user_id, entry.sermon_id).run();
+            const sets: string[] = [];
+            const params: any[] = [];
+            if (entry.completed !== undefined) {
+              sets.push("completed = ?");
+              params.push(entry.completed);
+              sets.push("completed_at = ?");
+              params.push(entry.completed ? new Date().toISOString() : null);
+            }
+            if (entry.questions_done !== undefined) {
+              sets.push("questions_done = ?");
+              params.push(entry.questions_done);
+            }
+            if (sets.length > 0) {
+              params.push(entry.user_id, entry.sermon_id);
+              await _d1.prepare(`UPDATE study_progress SET ${sets.join(", ")} WHERE user_id = ? AND sermon_id = ?`).bind(...params).run();
+            }
             return (await _d1.prepare("SELECT * FROM study_progress WHERE user_id = ? AND sermon_id = ?").bind(entry.user_id, entry.sermon_id).first<StudyProgress>()) || existing;
           }
-          await _d1.prepare("INSERT INTO study_progress (user_id, sermon_id, completed, completed_at, created_at) VALUES (?, ?, ?, ?, datetime('now'))").bind(entry.user_id, entry.sermon_id, entry.completed, entry.completed ? new Date().toISOString() : null).run();
+          await _d1.prepare("INSERT INTO study_progress (user_id, sermon_id, completed, questions_done, completed_at, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(entry.user_id, entry.sermon_id, entry.completed ?? 0, entry.questions_done ?? 0, entry.completed ? new Date().toISOString() : null).run();
           const row = await _d1.prepare("SELECT * FROM study_progress WHERE rowid = last_insert_rowid()").first<StudyProgress>();
-          return row || { ...entry, id: Date.now(), completed_at: entry.completed ? new Date().toISOString() : null, created_at: new Date().toISOString() };
+          return row || { ...entry, id: Date.now(), questions_done: entry.questions_done ?? 0, completed_at: entry.completed ? new Date().toISOString() : null, created_at: new Date().toISOString() };
         },
       },
       stats: {
@@ -405,15 +420,20 @@ export function createDb(d1: D1Database | null) {
         ensureMemSeeded();
         return memProgress.filter((p) => p.user_id === userId);
       },
-      upsert: async (entry: { user_id: number; sermon_id: number; completed: number }): Promise<StudyProgress> => {
+      upsert: async (entry: { user_id: number; sermon_id: number; completed?: number; questions_done?: number }): Promise<StudyProgress> => {
         ensureMemSeeded();
         const existing = memProgress.find((p) => p.user_id === entry.user_id && p.sermon_id === entry.sermon_id);
         if (existing) {
-          existing.completed = entry.completed;
-          existing.completed_at = entry.completed ? new Date().toISOString() : null;
+          if (entry.completed !== undefined) {
+            existing.completed = entry.completed;
+            existing.completed_at = entry.completed ? new Date().toISOString() : null;
+          }
+          if (entry.questions_done !== undefined) {
+            existing.questions_done = entry.questions_done;
+          }
           return existing;
         }
-        const newEntry: StudyProgress = { ...entry, id: memGetNextId("progress"), completed_at: entry.completed ? new Date().toISOString() : null, created_at: new Date().toISOString() };
+        const newEntry: StudyProgress = { ...entry, id: memGetNextId("progress"), completed: entry.completed ?? 0, questions_done: entry.questions_done ?? 0, completed_at: entry.completed ? new Date().toISOString() : null, created_at: new Date().toISOString() };
         memProgress.push(newEntry);
         return newEntry;
       },
