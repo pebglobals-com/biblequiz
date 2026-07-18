@@ -86,15 +86,151 @@ export default function AdminPage() {
           </button>
           <Link href="/" className="block text-center mt-4 text-sm text-ink-light hover:text-brand-600 transition-colors">Back to Home</Link>
         </form>
-      </div>
-    );
+    </div>
+  );
+}
+
+function StudyQAManager() {
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [questions, setQuestions] = useState<{ id: number; question_text: string; answer_text: string }[]>([]);
+  const [selectedSermonId, setSelectedSermonId] = useState<number | "">("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState<number | "new" | null>(null);
+  const [form, setForm] = useState({ question_text: "", answer_text: "" });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/sermons").then(r => r.json()).then(d => setSermons(d.sermons || [])).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!selectedSermonId) { setQuestions([]); return; }
+    setLoading(true);
+    fetch(`/api/admin/study-questions?sermonId=${selectedSermonId}`).then(r => r.json()).then(d => { setQuestions(d.questions || []); }).catch(() => setError("Failed to load")).finally(() => setLoading(false));
+  }, [selectedSermonId]);
+
+  function resetForm() { setForm({ question_text: "", answer_text: "" }); setEditingId(null); }
+
+  function startEdit(q: typeof questions[0]) {
+    setForm({ question_text: q.question_text, answer_text: q.answer_text });
+    setEditingId(q.id);
   }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.question_text || !form.answer_text || !selectedSermonId) return;
+    setSaving(true);
+    setError("");
+    try {
+      const isNew = editingId === "new";
+      const body = { sermon_id: selectedSermonId, question_text: form.question_text, answer_text: form.answer_text };
+      const res = await fetch(`/api/admin/study-questions${!isNew ? `?id=${editingId}` : ""}`, {
+        method: isNew ? "POST" : "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Save failed"); }
+      resetForm();
+      const r = await fetch(`/api/admin/study-questions?sermonId=${selectedSermonId}`);
+      const d = await r.json();
+      setQuestions(d.questions || []);
+    } catch (err: any) { setError(err.message); }
+    finally { setSaving(false); }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this study question?")) return;
+    try {
+      const res = await fetch(`/api/admin/study-questions?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      if (editingId === id) resetForm();
+      const r = await fetch(`/api/admin/study-questions?sermonId=${selectedSermonId}`);
+      const d = await r.json();
+      setQuestions(d.questions || []);
+    } catch (err: any) { setError(err.message); }
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-ink mb-6">Study Q&A</h2>
+      <p className="text-sm text-ink-muted mb-6">Open-ended study questions shown on the per-sermon Q&A page (separate from quiz questions).</p>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-ink mb-1">Select Sermon</label>
+        <select value={selectedSermonId} onChange={(e) => { setSelectedSermonId(e.target.value ? Number(e.target.value) : ""); resetForm(); }} className="w-full max-w-md px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500">
+          <option value="">— Choose a sermon —</option>
+          {sermons.map(s => <option key={s.id} value={s.id}>{s.title} ({s.age_bracket})</option>)}
+        </select>
+      </div>
+
+      {error && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{error}</div>}
+
+      {selectedSermonId && (editingId === "new" || typeof editingId === "number") && (
+        <form onSubmit={handleSave} className="bg-white rounded-2xl border border-surface-border shadow-sm p-6 mb-8">
+          <h3 className="text-lg font-bold text-ink mb-4">{editingId === "new" ? "New Study Question" : "Edit Study Question"}</h3>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-ink mb-1">Question *</label>
+            <input type="text" value={form.question_text} onChange={(e) => setForm({ ...form, question_text: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500" required />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-ink mb-1">Answer / Explanation *</label>
+            <textarea value={form.answer_text} onChange={(e) => setForm({ ...form, answer_text: e.target.value })} rows={4} className="w-full px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500" required />
+          </div>
+          <div className="flex items-center gap-3">
+            <button type="submit" disabled={saving} className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all">
+              {saving ? "Saving..." : editingId === "new" ? "Create Question" : "Save Changes"}
+            </button>
+            <button type="button" onClick={resetForm} className="px-6 py-2.5 border border-surface-border text-ink-muted font-medium rounded-xl hover:bg-gray-50 transition-all">Cancel</button>
+          </div>
+        </form>
+      )}
+
+      {!selectedSermonId ? (
+        <div className="text-center py-12 text-ink-muted">Select a sermon to manage its study questions</div>
+      ) : loading ? (
+        <div className="text-center py-12 text-ink-muted">Loading...</div>
+      ) : (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-ink">{questions.length} study question{questions.length !== 1 ? "s" : ""}</h3>
+            {editingId === null && (
+              <button onClick={() => { setEditingId("new"); setForm({ question_text: "", answer_text: "" }); }} className="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-all">
+                + Add Question
+              </button>
+            )}
+          </div>
+          {questions.length === 0 ? (
+            <div className="text-center py-12 text-ink-muted">No study questions yet.</div>
+          ) : (
+            <div className="space-y-3">
+              {questions.map((q, i) => (
+                <div key={q.id} className={`bg-white rounded-2xl border ${editingId === q.id ? "border-brand-500 ring-2 ring-brand-500/20" : "border-surface-border"} shadow-sm p-5`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-ink mb-1"><span className="text-ink-muted">Q{i + 1}:</span> {q.question_text}</p>
+                      <p className="text-sm text-ink-muted mt-1"><span className="font-medium text-ink">A:</span> {q.answer_text}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button onClick={() => startEdit(q)} className="px-3 py-1.5 text-sm font-medium text-ink-muted hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all">Edit</button>
+                      <button onClick={() => handleDelete(q.id)} className="px-3 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
   return <AdminDashboard />;
 }
 
 function AdminDashboard() {
-  const [tab, setTab] = useState<"sermons" | "questions">("sermons");
+  const [tab, setTab] = useState<"sermons" | "questions" | "study">("sermons");
 
   return (
     <div className="min-h-screen bg-surface">
@@ -105,6 +241,7 @@ function AdminDashboard() {
             <nav className="flex items-center gap-1">
               <button onClick={() => setTab("sermons")} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === "sermons" ? "bg-brand-600 text-white shadow-sm" : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"}`}>Sermons</button>
               <button onClick={() => setTab("questions")} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === "questions" ? "bg-brand-600 text-white shadow-sm" : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"}`}>Questions</button>
+              <button onClick={() => setTab("study")} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === "study" ? "bg-brand-600 text-white shadow-sm" : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"}`}>Study Q&A</button>
             </nav>
           </div>
           <button
@@ -117,7 +254,7 @@ function AdminDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {tab === "sermons" ? <SermonManager /> : <QuestionManager />}
+        {tab === "sermons" ? <SermonManager /> : tab === "questions" ? <QuestionManager /> : <StudyQAManager />}
       </main>
     </div>
   );
@@ -420,6 +557,142 @@ function QuestionManager() {
                           </span>
                         ))}
                       </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button onClick={() => startEdit(q)} className="px-3 py-1.5 text-sm font-medium text-ink-muted hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all">Edit</button>
+                      <button onClick={() => handleDelete(q.id)} className="px-3 py-1.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StudyQAManager() {
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [questions, setQuestions] = useState<{ id: number; question_text: string; answer_text: string }[]>([]);
+  const [selectedSermonId, setSelectedSermonId] = useState<number | "">("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState<number | "new" | null>(null);
+  const [form, setForm] = useState({ question_text: "", answer_text: "" });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/sermons").then(r => r.json()).then(d => setSermons(d.sermons || [])).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!selectedSermonId) { setQuestions([]); return; }
+    setLoading(true);
+    fetch(`/api/admin/study-questions?sermonId=${selectedSermonId}`).then(r => r.json()).then(d => { setQuestions(d.questions || []); }).catch(() => setError("Failed to load")).finally(() => setLoading(false));
+  }, [selectedSermonId]);
+
+  function resetForm() { setForm({ question_text: "", answer_text: "" }); setEditingId(null); }
+
+  function startEdit(q: typeof questions[0]) {
+    setForm({ question_text: q.question_text, answer_text: q.answer_text });
+    setEditingId(q.id);
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.question_text || !form.answer_text || !selectedSermonId) return;
+    setSaving(true);
+    setError("");
+    try {
+      const isNew = editingId === "new";
+      const body = { sermon_id: selectedSermonId, question_text: form.question_text, answer_text: form.answer_text };
+      const res = await fetch(`/api/admin/study-questions${!isNew ? `?id=${editingId}` : ""}`, {
+        method: isNew ? "POST" : "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Save failed"); }
+      resetForm();
+      const r = await fetch(`/api/admin/study-questions?sermonId=${selectedSermonId}`);
+      const d = await r.json();
+      setQuestions(d.questions || []);
+    } catch (err: any) { setError(err.message); }
+    finally { setSaving(false); }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this study question?")) return;
+    try {
+      const res = await fetch(`/api/admin/study-questions?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      if (editingId === id) resetForm();
+      const r = await fetch(`/api/admin/study-questions?sermonId=${selectedSermonId}`);
+      const d = await r.json();
+      setQuestions(d.questions || []);
+    } catch (err: any) { setError(err.message); }
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-ink mb-6">Study Q&A</h2>
+      <p className="text-sm text-ink-muted mb-6">Open-ended study questions shown on the per-sermon Q&A page (separate from quiz questions).</p>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-ink mb-1">Select Sermon</label>
+        <select value={selectedSermonId} onChange={(e) => { setSelectedSermonId(e.target.value ? Number(e.target.value) : ""); resetForm(); }} className="w-full max-w-md px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500">
+          <option value="">— Choose a sermon —</option>
+          {sermons.map(s => <option key={s.id} value={s.id}>{s.title} ({s.age_bracket})</option>)}
+        </select>
+      </div>
+
+      {error && <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{error}</div>}
+
+      {selectedSermonId && (editingId === "new" || typeof editingId === "number") && (
+        <form onSubmit={handleSave} className="bg-white rounded-2xl border border-surface-border shadow-sm p-6 mb-8">
+          <h3 className="text-lg font-bold text-ink mb-4">{editingId === "new" ? "New Study Question" : "Edit Study Question"}</h3>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-ink mb-1">Question *</label>
+            <input type="text" value={form.question_text} onChange={(e) => setForm({ ...form, question_text: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500" required />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-ink mb-1">Answer / Explanation *</label>
+            <textarea value={form.answer_text} onChange={(e) => setForm({ ...form, answer_text: e.target.value })} rows={4} className="w-full px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500" required />
+          </div>
+          <div className="flex items-center gap-3">
+            <button type="submit" disabled={saving} className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-all">
+              {saving ? "Saving..." : editingId === "new" ? "Create Question" : "Save Changes"}
+            </button>
+            <button type="button" onClick={resetForm} className="px-6 py-2.5 border border-surface-border text-ink-muted font-medium rounded-xl hover:bg-gray-50 transition-all">Cancel</button>
+          </div>
+        </form>
+      )}
+
+      {!selectedSermonId ? (
+        <div className="text-center py-12 text-ink-muted">Select a sermon to manage its study questions</div>
+      ) : loading ? (
+        <div className="text-center py-12 text-ink-muted">Loading...</div>
+      ) : (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-ink">{questions.length} study question{questions.length !== 1 ? "s" : ""}</h3>
+            {editingId === null && (
+              <button onClick={() => { setEditingId("new"); setForm({ question_text: "", answer_text: "" }); }} className="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-all">
+                + Add Question
+              </button>
+            )}
+          </div>
+          {questions.length === 0 ? (
+            <div className="text-center py-12 text-ink-muted">No study questions yet.</div>
+          ) : (
+            <div className="space-y-3">
+              {questions.map((q, i) => (
+                <div key={q.id} className={`bg-white rounded-2xl border ${editingId === q.id ? "border-brand-500 ring-2 ring-brand-500/20" : "border-surface-border"} shadow-sm p-5`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-ink mb-1"><span className="text-ink-muted">Q{i + 1}:</span> {q.question_text}</p>
+                      <p className="text-sm text-ink-muted mt-1"><span className="font-medium text-ink">A:</span> {q.answer_text}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => startEdit(q)} className="px-3 py-1.5 text-sm font-medium text-ink-muted hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all">Edit</button>

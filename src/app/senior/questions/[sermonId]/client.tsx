@@ -15,8 +15,7 @@ interface SermonData {
 interface QuestionData {
   id: number;
   question_text: string;
-  options: string[];
-  correct_answer: string;
+  answer_text: string;
   sermon_id: number;
 }
 
@@ -29,15 +28,15 @@ export default function SeniorQuestionsClient({ sermonId: sermonIdStr }: { sermo
   useEffect(() => {
     async function load() {
       try {
-        const [sermonsRes, questionsRes] = await Promise.all([
+        const [sermonsRes, sqRes] = await Promise.all([
           fetch("/api/sermons?age=senior"),
-          fetch(`/api/questions?age=senior&sermonIds=${sermonId}&withAnswers=true`)
+          fetch(`/api/study-questions?sermonId=${sermonId}`)
         ]);
         const sermonsData = await sermonsRes.json();
-        const questionsData = await questionsRes.json();
+        const sqData = await sqRes.json();
         const found = (sermonsData.sermons || []).find((s: SermonData) => s.id === sermonId);
         setSermon(found || null);
-        setQuestions(questionsData.questions || []);
+        setQuestions(sqData.questions || []);
       } catch (err) {
         console.error("Failed to load:", err);
       } finally {
@@ -121,7 +120,7 @@ export default function SeniorQuestionsClient({ sermonId: sermonIdStr }: { sermo
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-3">{sermon.title}</h1>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              Study {questions.length} questions and answers to master this topic.
+              Review {questions.length} study question{questions.length !== 1 ? "s" : ""} and {questions.length !== 1 ? "their answers" : "its answer"} to master this topic.
             </p>
           </div>
         </div>
@@ -142,7 +141,7 @@ export default function SeniorQuestionsClient({ sermonId: sermonIdStr }: { sermo
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Questions & Answers ({questions.length})
+                Study Questions ({questions.length})
               </h2>
             </div>
 
@@ -158,39 +157,11 @@ export default function SeniorQuestionsClient({ sermonId: sermonIdStr }: { sermo
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                      Q: {question.question_text}
+                      {question.question_text}
                     </h3>
-                    <div className="space-y-2 ml-14">
-                      {question.options.map((option, optIndex) => (
-                        <div 
-                          key={optIndex}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                            option === question.correct_answer
-                              ? "bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 border border-emerald-200 dark:border-emerald-800"
-                              : "bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700"
-                          }`}
-                        >
-                          <span className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                            option === question.correct_answer
-                              ? "bg-emerald-500 text-white"
-                              : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                          }`}>
-                            {String.fromCharCode(65 + optIndex)}
-                          </span>
-                          <span className={`font-medium ${
-                            option === question.correct_answer
-                              ? "text-emerald-800 dark:text-emerald-200"
-                              : "text-gray-700 dark:text-gray-300"
-                          }`}>
-                            {option}
-                            {option === question.correct_answer && (
-                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300">
-                                ✓ Correct
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="ml-14 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 border border-emerald-200 dark:border-emerald-800">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">Answer</span>
+                      <p className="text-emerald-800 dark:text-emerald-200 font-medium mt-1">{question.answer_text}</p>
                     </div>
                   </div>
                 </div>

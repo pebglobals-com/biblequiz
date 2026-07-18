@@ -1,4 +1,4 @@
-import type { Sermon, Question, QuizSession, QuizAnswer, User, StudyProgress } from "./types";
+import type { Sermon, Question, QuizSession, QuizAnswer, User, StudyProgress, StudyQuestion } from "./types";
 
 export function toSlug(title: string): string {
   return title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim() || "untitled";
@@ -34,6 +34,7 @@ const memSessions: QuizSession[] = [];
 const memAnswers: QuizAnswer[] = [];
 const memUsers: User[] = [];
 const memProgress: StudyProgress[] = [];
+const memStudyQuestions: StudyQuestion[] = [];
 let memNextId: Record<string, number> = {};
 
 function memGetNextId(collection: string): number {
@@ -142,6 +143,7 @@ export function createDb(d1: D1Database | null) {
         delete: async (id: number): Promise<void> => {
           await ensureSeeded();
           await _d1.prepare("DELETE FROM questions WHERE sermon_id = ?").bind(id).run();
+          await _d1.prepare("DELETE FROM study_questions WHERE sermon_id = ?").bind(id).run();
           await _d1.prepare("DELETE FROM study_progress WHERE sermon_id = ?").bind(id).run();
           await _d1.prepare("DELETE FROM sermons WHERE id = ?").bind(id).run();
         },
@@ -200,6 +202,36 @@ export function createDb(d1: D1Database | null) {
             results.push({ ...row, options: typeof row?.options === "string" ? JSON.parse(row.options) : row?.options || q.options });
           }
           return results;
+        },
+      },
+      studyQuestions: {
+        getBySermon: async (sermonId: number): Promise<StudyQuestion[]> => {
+          await ensureSeeded();
+          const { results } = await _d1.prepare("SELECT * FROM study_questions WHERE sermon_id = ? ORDER BY id").bind(sermonId).all<StudyQuestion>();
+          return results || [];
+        },
+        create: async (sq: Omit<StudyQuestion, "id" | "created_at">): Promise<StudyQuestion> => {
+          await ensureSeeded();
+          await _d1.prepare("INSERT INTO study_questions (sermon_id, question_text, answer_text, created_at) VALUES (?, ?, ?, datetime('now'))").bind(sq.sermon_id, sq.question_text, sq.answer_text).run();
+          const row = await _d1.prepare("SELECT * FROM study_questions WHERE rowid = last_insert_rowid()").first<StudyQuestion>();
+          return row || { ...sq, id: Date.now(), created_at: new Date().toISOString() };
+        },
+        update: async (id: number, data: Partial<Omit<StudyQuestion, "id" | "created_at">>): Promise<StudyQuestion | undefined> => {
+          await ensureSeeded();
+          const sets: string[] = [];
+          const params: any[] = [];
+          if (data.question_text !== undefined) { sets.push("question_text = ?"); params.push(data.question_text); }
+          if (data.answer_text !== undefined) { sets.push("answer_text = ?"); params.push(data.answer_text); }
+          if (data.sermon_id !== undefined) { sets.push("sermon_id = ?"); params.push(data.sermon_id); }
+          if (sets.length > 0) {
+            params.push(id);
+            await _d1.prepare(`UPDATE study_questions SET ${sets.join(", ")} WHERE id = ?`).bind(...params).run();
+          }
+          return _d1.prepare("SELECT * FROM study_questions WHERE id = ?").bind(id).first<StudyQuestion>();
+        },
+        delete: async (id: number): Promise<void> => {
+          await ensureSeeded();
+          await _d1.prepare("DELETE FROM study_questions WHERE id = ?").bind(id).run();
         },
       },
       quizSessions: {
@@ -376,6 +408,9 @@ export function createDb(d1: D1Database | null) {
           for (let i = memQuestions.length - 1; i >= 0; i--) {
             if (memQuestions[i].sermon_id === id) memQuestions.splice(i, 1);
           }
+          for (let i = memStudyQuestions.length - 1; i >= 0; i--) {
+            if (memStudyQuestions[i].sermon_id === id) memStudyQuestions.splice(i, 1);
+          }
           for (let i = memProgress.length - 1; i >= 0; i--) {
             if (memProgress[i].sermon_id === id) memProgress.splice(i, 1);
           }
@@ -422,6 +457,30 @@ export function createDb(d1: D1Database | null) {
           created.push(newQ);
         }
         return created;
+      },
+    },
+    studyQuestions: {
+      getBySermon: async (sermonId: number): Promise<StudyQuestion[]> => {
+        ensureMemSeeded();
+        return memStudyQuestions.filter((sq) => sq.sermon_id === sermonId);
+      },
+      create: async (sq: Omit<StudyQuestion, "id" | "created_at">): Promise<StudyQuestion> => {
+        ensureMemSeeded();
+        const newSQ: StudyQuestion = { ...sq, id: memGetNextId("study_questions"), created_at: new Date().toISOString() };
+        memStudyQuestions.push(newSQ);
+        return newSQ;
+      },
+      update: async (id: number, data: Partial<Omit<StudyQuestion, "id" | "created_at">>): Promise<StudyQuestion | undefined> => {
+        ensureMemSeeded();
+        const idx = memStudyQuestions.findIndex((sq) => sq.id === id);
+        if (idx === -1) return undefined;
+        Object.assign(memStudyQuestions[idx], data);
+        return memStudyQuestions[idx];
+      },
+      delete: async (id: number): Promise<void> => {
+        ensureMemSeeded();
+        const idx = memStudyQuestions.findIndex((sq) => sq.id === id);
+        if (idx !== -1) memStudyQuestions.splice(idx, 1);
       },
     },
     quizSessions: {

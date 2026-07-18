@@ -84,6 +84,14 @@ export interface QuizResult {
   sermon_title: string;
 }
 
+export interface StudyQuestion {
+  id: number;
+  sermon_id: number;
+  question_text: string;
+  answer_text: string;
+  created_at: string;
+}
+
 export interface Recommendation {
   topic: string;
   reason: string;
