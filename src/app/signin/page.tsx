@@ -54,6 +54,7 @@ function SignInForm() {
       }
       localStorage.setItem("userId", String(data.userId));
       localStorage.setItem("ageBracket", data.ageBracket);
+      localStorage.setItem("firstName", data.firstName);
       router.push(`/${data.ageBracket}/dashboard`);
     } catch {
       setApiError("Network error. Please try again.");

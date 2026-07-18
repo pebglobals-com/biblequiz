@@ -1,12 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function NavBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<{ name: string; bracket: string } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    const uid = localStorage.getItem("userId");
+    if (uid) {
+      setUser({
+        name: localStorage.getItem("firstName") || "My Dashboard",
+        bracket: localStorage.getItem("ageBracket") || "junior",
+      });
+    }
+  }, []);
 
   useEffect(() => {
     function onScroll() {
@@ -16,11 +30,18 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const links = [
-    { href: "/", label: "Home" },
-    { href: "/signin", label: "Sign In" },
-    { href: "/signup", label: "Sign Up" },
-  ];
+  function handleSignOut() {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("ageBracket");
+    localStorage.removeItem("firstName");
+    setUser(null);
+    router.push("/");
+  }
+
+  function isActive(href: string) {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  }
 
   return (
     <nav
@@ -41,22 +62,64 @@ export default function NavBar() {
           </span>
         </Link>
         <div className="flex items-center gap-1">
-          {links.map((link) => {
-            const isActive = pathname === link.href;
-            return (
+          <Link
+            href="/"
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+              pathname === "/"
+                ? "bg-brand-600 text-white shadow-sm"
+                : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"
+            }`}
+          >
+            Home
+          </Link>
+
+          {mounted && user ? (
+            <>
               <Link
-                key={link.href}
-                href={link.href}
+                href={`/${user.bracket}/dashboard`}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  isActive
+                  pathname.includes("/dashboard")
                     ? "bg-brand-600 text-white shadow-sm"
                     : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"
                 }`}
               >
-                {link.label}
+                Dashboard
               </Link>
-            );
-          })}
+              <span className="text-ink-light text-sm mx-1 select-none">|</span>
+              <span className="px-3 py-1.5 text-sm font-medium text-brand-700 bg-brand-50 rounded-lg">
+                {user.name}
+              </span>
+              <button
+                onClick={handleSignOut}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signin"
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  pathname === "/signin"
+                    ? "bg-brand-600 text-white shadow-sm"
+                    : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"
+                }`}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  pathname === "/signup"
+                    ? "bg-brand-600 text-white shadow-sm"
+                    : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"
+                }`}
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
