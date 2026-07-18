@@ -50,6 +50,7 @@ export interface User {
   phone: string;
   email: string;
   age_bracket: AgeBracket;
+  password_hash: string;
   email_verified: number;
   verification_token: string | null;
   created_at: string;

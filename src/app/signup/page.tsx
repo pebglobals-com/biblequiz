@@ -10,6 +10,8 @@ export default function SignupPage() {
     branch: "",
     phone: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     age_bracket: "junior" as "junior" | "senior",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -27,6 +29,10 @@ export default function SignupPage() {
     if (!form.email.trim()) e.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Invalid email address";
     if (form.phone && !/^[\d\s\-+()]{7,}$/.test(form.phone)) e.phone = "Invalid phone number";
+    if (!form.password) e.password = "Password is required";
+    else if (form.password.length < 8) e.password = "Password must be at least 8 characters";
+    if (!form.confirmPassword) e.confirmPassword = "Please confirm your password";
+    else if (form.password !== form.confirmPassword) e.confirmPassword = "Passwords do not match";
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -40,7 +46,7 @@ export default function SignupPage() {
       const res = await fetch("/api/users/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, confirmPassword: undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -212,6 +218,31 @@ export default function SignupPage() {
                   placeholder="+1234567890"
                 />
                 {errors.phone && <p className="text-red-600 text-xs mt-1">{errors.phone}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-ink mb-1.5">Password</label>
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => update("password", e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border bg-surface-card text-ink placeholder:text-ink-light focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all duration-200 ${errors.password ? "ring-2 ring-red-500 border-red-500" : "border-surface-border"}`}
+                  placeholder="At least 8 characters"
+                />
+                {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-ink mb-1.5">Confirm Password</label>
+                <input
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={(e) => update("confirmPassword", e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border bg-surface-card text-ink placeholder:text-ink-light focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all duration-200 ${errors.confirmPassword ? "ring-2 ring-red-500 border-red-500" : "border-surface-border"}`}
+                  placeholder="Repeat password"
+                />
+                {errors.confirmPassword && <p className="text-red-600 text-xs mt-1">{errors.confirmPassword}</p>}
               </div>
             </div>
 

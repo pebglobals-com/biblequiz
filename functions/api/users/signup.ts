@@ -1,4 +1,5 @@
 import { createDb } from "../../lib/db";
+import { hashPassword } from "../../lib/password";
 import { Resend } from "resend";
 
 function generateToken(): string {
@@ -11,10 +12,14 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
   try {
     const db = createDb(env.DB || null);
     const body = await request.json();
-    const { first_name, last_name, branch, phone, email, age_bracket } = body;
+    const { first_name, last_name, branch, phone, email, age_bracket, password } = body;
 
     if (!first_name || !last_name || !branch || !email || !age_bracket) {
       return new Response(JSON.stringify({ error: "Missing required fields: first_name, last_name, branch, email, age_bracket" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+
+    if (!password || password.length < 8) {
+      return new Response(JSON.stringify({ error: "Password must be at least 8 characters" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
     if (!["junior", "senior"].includes(age_bracket)) {
@@ -26,6 +31,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
       return new Response(JSON.stringify({ error: "An account with this email already exists" }), { status: 409, headers: { "Content-Type": "application/json" } });
     }
 
+    const password_hash = await hashPassword(password);
     const verificationToken = generateToken();
 
     const user = await db.users.create({
@@ -35,6 +41,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
       phone: phone || "",
       email,
       age_bracket,
+      password_hash,
       email_verified: 0,
       verification_token: verificationToken,
     });

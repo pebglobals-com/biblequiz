@@ -273,7 +273,7 @@ export function createDb(d1: D1Database | null) {
       users: {
         create: async (user: Omit<User, "id" | "created_at"> & { email_verified?: number; verification_token?: string | null }): Promise<User> => {
           await ensureSeeded();
-          await _d1.prepare("INSERT INTO users (first_name, last_name, branch, phone, email, age_bracket, email_verified, verification_token, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))").bind(user.first_name, user.last_name, user.branch, user.phone, user.email, user.age_bracket, user.email_verified ?? 0, user.verification_token ?? null).run();
+          await _d1.prepare("INSERT INTO users (first_name, last_name, branch, phone, email, age_bracket, password_hash, email_verified, verification_token, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))").bind(user.first_name, user.last_name, user.branch, user.phone, user.email, user.age_bracket, user.password_hash ?? "", user.email_verified ?? 0, user.verification_token ?? null).run();
           return (await _d1.prepare("SELECT * FROM users WHERE rowid = last_insert_rowid()").first<User>())!;
         },
         getById: async (id: number): Promise<User | undefined> => {
@@ -517,7 +517,7 @@ export function createDb(d1: D1Database | null) {
     users: {
       create: async (user: Omit<User, "id" | "created_at"> & { email_verified?: number; verification_token?: string | null }): Promise<User> => {
         ensureMemSeeded();
-        const newUser: User = { ...user, id: memGetNextId("users"), email_verified: user.email_verified ?? 0, verification_token: user.verification_token ?? null, created_at: new Date().toISOString() } as User;
+        const newUser: User = { ...user, id: memGetNextId("users"), password_hash: user.password_hash ?? "", email_verified: user.email_verified ?? 0, verification_token: user.verification_token ?? null, created_at: new Date().toISOString() } as User;
         memUsers.push(newUser);
         return newUser;
       },

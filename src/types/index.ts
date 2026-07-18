@@ -7,7 +7,8 @@ export interface User {
   branch: string;
   phone: string;
   email: string;
-  age_bracket: AgeBracket;
+  age_bracket: "junior" | "senior";
+  password_hash: string;
   email_verified: number;
   verification_token: string | null;
   created_at: string;

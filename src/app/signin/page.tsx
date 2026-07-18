@@ -8,6 +8,7 @@ function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -33,6 +34,10 @@ function SignInForm() {
       setApiError("Please enter your email");
       return;
     }
+    if (!password) {
+      setApiError("Please enter your password");
+      return;
+    }
     setLoading(true);
     setApiError("");
     setNeedsVerification(false);
@@ -40,7 +45,7 @@ function SignInForm() {
       const res = await fetch("/api/users/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -146,7 +151,18 @@ function SignInForm() {
             />
           </div>
 
-          <button
+            <div>
+              <label className="block text-sm font-medium text-ink mb-1.5">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setApiError(""); }}
+                className="w-full px-4 py-3 rounded-xl border border-surface-border bg-surface-card text-ink placeholder:text-ink-light focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all duration-200"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <button
             type="submit"
             disabled={loading}
             className="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold text-lg rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
