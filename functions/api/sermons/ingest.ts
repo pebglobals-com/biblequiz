@@ -40,6 +40,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
       slug: toSlug(categorized.title),
       source_url: url || "",
       content: categorized.adjustedContent,
+      excerpt: "",
       age_bracket: ageBracket,
       category: categorized.category,
     });

@@ -43,14 +43,14 @@ function memGetNextId(collection: string): number {
 
 // Seed data
 const SEED_SERMONS: Omit<Sermon, "id" | "created_at">[] = [
-  { title: "Who is God?", slug: toSlug("Who is God?"), source_url: "https://example.com/who-is-god", content: "God is the Creator of everything - the heavens, the earth, and all living things. He is eternal, which means He has no beginning and no end. God is three persons in one: God the Father, God the Son (Jesus), and God the Holy Spirit. This is called the Trinity. God loves us very much. He created us in His image, which means we can think, love, and make choices. He wants to have a relationship with each one of us. The Bible tells us that 'God is love' (1 John 4:8). Even though we cannot see God with our eyes, we can know He is real through His creation, His Word (the Bible), and through Jesus who came to show us what God is like.", age_bracket: "junior" as const, category: "God's Character" },
-  { title: "Jesus Loves Me", slug: toSlug("Jesus Loves Me"), source_url: "https://example.com/jesus-loves-me", content: "Jesus loves every child! The Bible says, 'Let the little children come to me, and do not hinder them, for the kingdom of heaven belongs to such as these' (Matthew 19:14). Jesus showed His love by coming to earth as a baby, growing up, teaching about God's love, healing sick people, and finally dying on the cross for our sins. He rose again three days later, showing He has power over death! When we believe in Jesus and ask Him to forgive our sins, He becomes our forever friend. He promises to never leave us (Hebrews 13:5).", age_bracket: "junior" as const, category: "Jesus" },
-  { title: "The Bible: God's Special Book", slug: toSlug("The Bible: God's Special Book"), source_url: "https://example.com/bible-gods-book", content: "The Bible is God's Word written for us. It has 66 books - 39 in the Old Testament and 27 in the New Testament. The Old Testament tells about God's creation and His people before Jesus came. The New Testament tells about Jesus' life and the early church. The Bible is true and never changes. It teaches us how to live, how to love God, and how to love others. When we read the Bible, God speaks to our hearts.", age_bracket: "junior" as const, category: "The Bible" },
-  { title: "Prayer: Talking with God", slug: toSlug("Prayer: Talking with God"), source_url: "https://example.com/prayer-talking-with-god", content: "Prayer is simply talking to God - just like you talk to your best friend! You can pray anytime, anywhere, about anything. God loves to hear from His children. Jesus taught us how to pray in the Lord's Prayer (Matthew 6:9-13). We can pray using ACTS: Adoration, Confession, Thanksgiving, Supplication. God always answers prayers - sometimes yes, sometimes no, sometimes wait.", age_bracket: "junior" as const, category: "Prayer" },
-  { title: "The Trinity: Father, Son, Holy Spirit", slug: toSlug("The Trinity: Father, Son, Holy Spirit"), source_url: "https://example.com/trinity", content: "The Trinity is one of the most profound mysteries of the Christian faith. God exists as three distinct persons - Father, Son, and Holy Spirit - yet is one God. This is not three gods, but one God in three persons. The Father is the Creator and Sustainer of all things. The Son (Jesus) is God become human - fully God and fully man. The Holy Spirit is God's presence with us today.", age_bracket: "senior" as const, category: "Theology" },
-  { title: "Apologetics: Defending Your Faith", slug: toSlug("Apologetics: Defending Your Faith"), source_url: "https://example.com/apologetics", content: "Apologetics comes from the Greek word 'apologia' meaning a reasoned defense. As Christians, we're called to 'always be prepared to give an answer to everyone who asks you to give the reason for the hope that you have' (1 Peter 3:15). Key areas of apologetics include evidence for God's existence, reliability of the Bible, the resurrection of Jesus, and the problem of evil.", age_bracket: "senior" as const, category: "Apologetics" },
-  { title: "Biblical Worldview", slug: toSlug("Biblical Worldview"), source_url: "https://example.com/biblical-worldview", content: "A worldview is the lens through which we interpret reality. Everyone has a worldview - the question is whether it's biblical. A biblical worldview answers life's big questions: Origin (Where did we come from?), Meaning (Why are we here?), Morality (How should we live?), Destiny (What happens after death?).", age_bracket: "senior" as const, category: "Worldview" },
-  { title: "Spiritual Disciplines for Growth", slug: toSlug("Spiritual Disciplines for Growth"), source_url: "https://example.com/spiritual-disciplines", content: "Spiritual disciplines are practices that position us to receive God's grace and grow in Christlikeness. They're not about earning God's favor. They're about creating space for the Holy Spirit to transform us. Key disciplines include Bible intake, prayer, worship, fellowship, fasting, solitude and silence, stewardship, and evangelism.", age_bracket: "senior" as const, category: "Christian Living" },
+  { title: "Who is God?", slug: toSlug("Who is God?"), source_url: "https://example.com/who-is-god", content: "God is the Creator of everything - the heavens, the earth, and all living things. He is eternal, which means He has no beginning and no end. God is three persons in one: God the Father, God the Son (Jesus), and God the Holy Spirit. This is called the Trinity. God loves us very much. He created us in His image, which means we can think, love, and make choices. He wants to have a relationship with each one of us. The Bible tells us that 'God is love' (1 John 4:8). Even though we cannot see God with our eyes, we can know He is real through His creation, His Word (the Bible), and through Jesus who came to show us what God is like.", excerpt: excerptFromContent("God is the Creator of everything - the heavens, the earth, and all living things. He is eternal, which means He has no beginning and no end. God is three persons in one: God the Father, God the Son (Jesus), and God the Holy Spirit. This is called the Trinity. God loves us very much. He created us in His image, which means we can think, love, and make choices. He wants to have a relationship with each one of us. The Bible tells us that 'God is love' (1 John 4:8). Even though we cannot see God with our eyes, we can know He is real through His creation, His Word (the Bible), and through Jesus who came to show us what God is like."), age_bracket: "junior" as const, category: "God's Character" },
+  { title: "Jesus Loves Me", slug: toSlug("Jesus Loves Me"), source_url: "https://example.com/jesus-loves-me", content: "Jesus loves every child! The Bible says, 'Let the little children come to me, and do not hinder them, for the kingdom of heaven belongs to such as these' (Matthew 19:14). Jesus showed His love by coming to earth as a baby, growing up, teaching about God's love, healing sick people, and finally dying on the cross for our sins. He rose again three days later, showing He has power over death! When we believe in Jesus and ask Him to forgive our sins, He becomes our forever friend. He promises to never leave us (Hebrews 13:5).", excerpt: excerptFromContent("Jesus loves every child! The Bible says, 'Let the little children come to me, and do not hinder them, for the kingdom of heaven belongs to such as these' (Matthew 19:14). Jesus showed His love by coming to earth as a baby, growing up, teaching about God's love, healing sick people, and finally dying on the cross for our sins. He rose again three days later, showing He has power over death! When we believe in Jesus and ask Him to forgive our sins, He becomes our forever friend. He promises to never leave us (Hebrews 13:5)."), age_bracket: "junior" as const, category: "Jesus" },
+  { title: "The Bible: God's Special Book", slug: toSlug("The Bible: God's Special Book"), source_url: "https://example.com/bible-gods-book", content: "The Bible is God's Word written for us. It has 66 books - 39 in the Old Testament and 27 in the New Testament. The Old Testament tells about God's creation and His people before Jesus came. The New Testament tells about Jesus' life and the early church. The Bible is true and never changes. It teaches us how to live, how to love God, and how to love others. When we read the Bible, God speaks to our hearts.", excerpt: excerptFromContent("The Bible is God's Word written for us. It has 66 books - 39 in the Old Testament and 27 in the New Testament. The Old Testament tells about God's creation and His people before Jesus came. The New Testament tells about Jesus' life and the early church. The Bible is true and never changes. It teaches us how to live, how to love God, and how to love others. When we read the Bible, God speaks to our hearts."), age_bracket: "junior" as const, category: "The Bible" },
+  { title: "Prayer: Talking with God", slug: toSlug("Prayer: Talking with God"), source_url: "https://example.com/prayer-talking-with-god", content: "Prayer is simply talking to God - just like you talk to your best friend! You can pray anytime, anywhere, about anything. God loves to hear from His children. Jesus taught us how to pray in the Lord's Prayer (Matthew 6:9-13). We can pray using ACTS: Adoration, Confession, Thanksgiving, Supplication. God always answers prayers - sometimes yes, sometimes no, sometimes wait.", excerpt: excerptFromContent("Prayer is simply talking to God - just like you talk to your best friend! You can pray anytime, anywhere, about anything. God loves to hear from His children. Jesus taught us how to pray in the Lord's Prayer (Matthew 6:9-13). We can pray using ACTS: Adoration, Confession, Thanksgiving, Supplication. God always answers prayers - sometimes yes, sometimes no, sometimes wait."), age_bracket: "junior" as const, category: "Prayer" },
+  { title: "The Trinity: Father, Son, Holy Spirit", slug: toSlug("The Trinity: Father, Son, Holy Spirit"), source_url: "https://example.com/trinity", content: "The Trinity is one of the most profound mysteries of the Christian faith. God exists as three distinct persons - Father, Son, and Holy Spirit - yet is one God. This is not three gods, but one God in three persons. The Father is the Creator and Sustainer of all things. The Son (Jesus) is God become human - fully God and fully man. The Holy Spirit is God's presence with us today.", excerpt: excerptFromContent("The Trinity is one of the most profound mysteries of the Christian faith. God exists as three distinct persons - Father, Son, and Holy Spirit - yet is one God. This is not three gods, but one God in three persons. The Father is the Creator and Sustainer of all things. The Son (Jesus) is God become human - fully God and fully man. The Holy Spirit is God's presence with us today."), age_bracket: "senior" as const, category: "Theology" },
+  { title: "Apologetics: Defending Your Faith", slug: toSlug("Apologetics: Defending Your Faith"), source_url: "https://example.com/apologetics", content: "Apologetics comes from the Greek word 'apologia' meaning a reasoned defense. As Christians, we're called to 'always be prepared to give an answer to everyone who asks you to give the reason for the hope that you have' (1 Peter 3:15). Key areas of apologetics include evidence for God's existence, reliability of the Bible, the resurrection of Jesus, and the problem of evil.", excerpt: excerptFromContent("Apologetics comes from the Greek word 'apologia' meaning a reasoned defense. As Christians, we're called to 'always be prepared to give an answer to everyone who asks you to give the reason for the hope that you have' (1 Peter 3:15). Key areas of apologetics include evidence for God's existence, reliability of the Bible, the resurrection of Jesus, and the problem of evil."), age_bracket: "senior" as const, category: "Apologetics" },
+  { title: "Biblical Worldview", slug: toSlug("Biblical Worldview"), source_url: "https://example.com/biblical-worldview", content: "A worldview is the lens through which we interpret reality. Everyone has a worldview - the question is whether it's biblical. A biblical worldview answers life's big questions: Origin (Where did we come from?), Meaning (Why are we here?), Morality (How should we live?), Destiny (What happens after death?).", excerpt: excerptFromContent("A worldview is the lens through which we interpret reality. Everyone has a worldview - the question is whether it's biblical. A biblical worldview answers life's big questions: Origin (Where did we come from?), Meaning (Why are we here?), Morality (How should we live?), Destiny (What happens after death?)."), age_bracket: "senior" as const, category: "Worldview" },
+  { title: "Spiritual Disciplines for Growth", slug: toSlug("Spiritual Disciplines for Growth"), source_url: "https://example.com/spiritual-disciplines", content: "Spiritual disciplines are practices that position us to receive God's grace and grow in Christlikeness. They're not about earning God's favor. They're about creating space for the Holy Spirit to transform us. Key disciplines include Bible intake, prayer, worship, fellowship, fasting, solitude and silence, stewardship, and evangelism.", excerpt: excerptFromContent("Spiritual disciplines are practices that position us to receive God's grace and grow in Christlikeness. They're not about earning God's favor. They're about creating space for the Holy Spirit to transform us. Key disciplines include Bible intake, prayer, worship, fellowship, fasting, solitude and silence, stewardship, and evangelism."), age_bracket: "senior" as const, category: "Christian Living" },
 ];
 
 const SEED_QUESTIONS: { sermonIdx: number; question_text: string; options: string[]; correct_answer: string }[] = [
@@ -117,9 +117,33 @@ export function createDb(d1: D1Database | null) {
         create: async (sermon: Omit<Sermon, "id" | "created_at">): Promise<Sermon> => {
           await ensureSeeded();
           const slug = sermon.slug || toSlug(sermon.title);
-          await _d1.prepare("INSERT INTO sermons (title, slug, source_url, content, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))").bind(sermon.title, slug, sermon.source_url, sermon.content, sermon.age_bracket, sermon.category).run();
+          const excerpt = sermon.excerpt || excerptFromContent(sermon.content);
+          await _d1.prepare("INSERT INTO sermons (title, slug, source_url, content, excerpt, age_bracket, category, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))").bind(sermon.title, slug, sermon.source_url, sermon.content, excerpt, sermon.age_bracket, sermon.category).run();
           const row = await _d1.prepare("SELECT * FROM sermons WHERE rowid = last_insert_rowid()").first<Sermon>();
-          return row || { ...sermon, slug, id: Date.now(), created_at: new Date().toISOString() };
+          return row || { ...sermon, excerpt, slug, id: Date.now(), created_at: new Date().toISOString() };
+        },
+        update: async (id: number, data: Partial<Omit<Sermon, "id" | "created_at">>): Promise<Sermon | undefined> => {
+          await ensureSeeded();
+          const sets: string[] = [];
+          const params: any[] = [];
+          if (data.title !== undefined) { sets.push("title = ?"); params.push(data.title); }
+          if (data.slug !== undefined) { sets.push("slug = ?"); params.push(data.slug); }
+          if (data.source_url !== undefined) { sets.push("source_url = ?"); params.push(data.source_url); }
+          if (data.content !== undefined) { sets.push("content = ?"); params.push(data.content); }
+          if (data.excerpt !== undefined) { sets.push("excerpt = ?"); params.push(data.excerpt); }
+          if (data.age_bracket !== undefined) { sets.push("age_bracket = ?"); params.push(data.age_bracket); }
+          if (data.category !== undefined) { sets.push("category = ?"); params.push(data.category); }
+          if (sets.length > 0) {
+            params.push(id);
+            await _d1.prepare(`UPDATE sermons SET ${sets.join(", ")} WHERE id = ?`).bind(...params).run();
+          }
+          return _d1.prepare("SELECT * FROM sermons WHERE id = ?").bind(id).first<Sermon>();
+        },
+        delete: async (id: number): Promise<void> => {
+          await ensureSeeded();
+          await _d1.prepare("DELETE FROM questions WHERE sermon_id = ?").bind(id).run();
+          await _d1.prepare("DELETE FROM study_progress WHERE sermon_id = ?").bind(id).run();
+          await _d1.prepare("DELETE FROM sermons WHERE id = ?").bind(id).run();
         },
       },
       questions: {
@@ -147,6 +171,26 @@ export function createDb(d1: D1Database | null) {
           await _d1.prepare("INSERT INTO questions (sermon_id, question_text, options, correct_answer, age_bracket, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))").bind(question.sermon_id, question.question_text, JSON.stringify(question.options), question.correct_answer, question.age_bracket).run();
           const row = await _d1.prepare("SELECT * FROM questions WHERE rowid = last_insert_rowid()").first<any>();
           return { ...row, options: typeof row?.options === "string" ? JSON.parse(row.options) : row?.options || question.options };
+        },
+        update: async (id: number, data: Partial<Omit<Question, "id" | "created_at">>): Promise<Question | undefined> => {
+          await ensureSeeded();
+          const sets: string[] = [];
+          const params: any[] = [];
+          if (data.question_text !== undefined) { sets.push("question_text = ?"); params.push(data.question_text); }
+          if (data.options !== undefined) { sets.push("options = ?"); params.push(JSON.stringify(data.options)); }
+          if (data.correct_answer !== undefined) { sets.push("correct_answer = ?"); params.push(data.correct_answer); }
+          if (data.age_bracket !== undefined) { sets.push("age_bracket = ?"); params.push(data.age_bracket); }
+          if (data.sermon_id !== undefined) { sets.push("sermon_id = ?"); params.push(data.sermon_id); }
+          if (sets.length > 0) {
+            params.push(id);
+            await _d1.prepare(`UPDATE questions SET ${sets.join(", ")} WHERE id = ?`).bind(...params).run();
+          }
+          const row = await _d1.prepare("SELECT * FROM questions WHERE id = ?").bind(id).first<any>();
+          return row ? { ...row, options: typeof row.options === "string" ? JSON.parse(row.options) : row.options } : undefined;
+        },
+        delete: async (id: number): Promise<void> => {
+          await ensureSeeded();
+          await _d1.prepare("DELETE FROM questions WHERE id = ?").bind(id).run();
         },
         createMany: async (items: Omit<Question, "id" | "created_at">[]): Promise<Question[]> => {
           const results: Question[] = [];
@@ -313,9 +357,30 @@ export function createDb(d1: D1Database | null) {
       },
       create: async (sermon: Omit<Sermon, "id" | "created_at">): Promise<Sermon> => {
         ensureMemSeeded();
-        const newSermon: Sermon = { ...sermon, slug: sermon.slug || toSlug(sermon.title), id: memGetNextId("sermons"), created_at: new Date().toISOString() };
+        const excerpt = sermon.excerpt || excerptFromContent(sermon.content);
+        const newSermon: Sermon = { ...sermon, excerpt, slug: sermon.slug || toSlug(sermon.title), id: memGetNextId("sermons"), created_at: new Date().toISOString() };
         memSermons.push(newSermon);
         return newSermon;
+      },
+      update: async (id: number, data: Partial<Omit<Sermon, "id" | "created_at">>): Promise<Sermon | undefined> => {
+        ensureMemSeeded();
+        const idx = memSermons.findIndex((s) => s.id === id);
+        if (idx === -1) return undefined;
+        Object.assign(memSermons[idx], data);
+        return memSermons[idx];
+      },
+      delete: async (id: number): Promise<void> => {
+        ensureMemSeeded();
+        const idx = memSermons.findIndex((s) => s.id === id);
+        if (idx !== -1) {
+          for (let i = memQuestions.length - 1; i >= 0; i--) {
+            if (memQuestions[i].sermon_id === id) memQuestions.splice(i, 1);
+          }
+          for (let i = memProgress.length - 1; i >= 0; i--) {
+            if (memProgress[i].sermon_id === id) memProgress.splice(i, 1);
+          }
+          memSermons.splice(idx, 1);
+        }
       },
     },
     questions: {
@@ -335,6 +400,18 @@ export function createDb(d1: D1Database | null) {
         const newQ: Question = { ...question, id: memGetNextId("questions"), created_at: new Date().toISOString() };
         memQuestions.push(newQ);
         return newQ;
+      },
+      update: async (id: number, data: Partial<Omit<Question, "id" | "created_at">>): Promise<Question | undefined> => {
+        ensureMemSeeded();
+        const idx = memQuestions.findIndex((q) => q.id === id);
+        if (idx === -1) return undefined;
+        Object.assign(memQuestions[idx], data);
+        return memQuestions[idx];
+      },
+      delete: async (id: number): Promise<void> => {
+        ensureMemSeeded();
+        const idx = memQuestions.findIndex((q) => q.id === id);
+        if (idx !== -1) memQuestions.splice(idx, 1);
       },
       createMany: async (items: Omit<Question, "id" | "created_at">[]): Promise<Question[]> => {
         ensureMemSeeded();

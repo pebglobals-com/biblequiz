@@ -29,7 +29,8 @@ export interface Sermon {
   slug: string;
   source_url: string;
   content: string;
-  age_bracket: AgeBracket;
+  excerpt: string;
+  age_bracket: "junior" | "senior";
   category: string;
   created_at: string;
 }

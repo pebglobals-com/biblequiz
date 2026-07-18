@@ -6,6 +6,7 @@ export interface Sermon {
   slug: string;
   source_url: string;
   content: string;
+  excerpt: string;
   age_bracket: AgeBracket;
   category: string;
   created_at: string;
