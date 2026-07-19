@@ -1,11 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState, useCallback } from "react";
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import QuestionCard from "@/components/QuestionCard";
 import QuizGrid from "@/components/QuizGrid";
 import Timer from "@/components/Timer";
 import ResultsDashboard from "@/components/ResultsDashboard";
+import StudyFlow from "./study-flow";
 
 interface QuizQuestion {
   id: number;
@@ -27,7 +29,7 @@ interface ResultData {
   results: any[];
 }
 
-function QuizPlayContent() {
+function MCQFlow() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const ids = searchParams.get("ids") || "";
@@ -239,7 +241,7 @@ function QuizPlayContent() {
     );
   }
 
-  if (!ids || questions.length === 0) {
+  if (questions.length === 0) {
     return (
       <div className="card p-16 text-center animate-in">
         <div className="text-5xl mb-4">📭</div>
@@ -282,18 +284,6 @@ function QuizPlayContent() {
     }
     if (next !== -1) {
       handleSelectQuestion(next);
-    }
-  }
-
-  function handleFeedbackComplete() {
-    if (!feedbackPendingRef.current) {
-      feedbackPendingRef.current = true;
-      const currentQ = currentIndex;
-      if (currentQ !== null && answers[currentQ]) {
-        const a = answers[currentQ];
-        if (a.selectedAnswer === null) {
-        }
-      }
     }
   }
 
@@ -435,6 +425,18 @@ function QuizPlayContent() {
       </div>
     </div>
   );
+}
+
+function QuizPlayContent() {
+  const searchParams = useSearchParams();
+  const ids = searchParams.get("ids") || "";
+  const age = searchParams.get("age") || "junior";
+
+  if (!ids) {
+    return <StudyFlow age={age} />;
+  }
+
+  return <MCQFlow />;
 }
 
 export default function QuizPlayPage() {

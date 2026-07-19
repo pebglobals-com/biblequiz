@@ -205,6 +205,17 @@ export function createDb(d1: D1Database | null) {
         },
       },
       studyQuestions: {
+        getAll: async (ageBracket?: string): Promise<StudyQuestion[]> => {
+          await ensureSeeded();
+          if (ageBracket) {
+            const { results } = await _d1.prepare(
+              "SELECT sq.* FROM study_questions sq JOIN sermons s ON sq.sermon_id = s.id WHERE s.age_bracket = ? ORDER BY sq.id"
+            ).bind(ageBracket).all<StudyQuestion>();
+            return results || [];
+          }
+          const { results } = await _d1.prepare("SELECT * FROM study_questions ORDER BY id").all<StudyQuestion>();
+          return results || [];
+        },
         getBySermon: async (sermonId: number): Promise<StudyQuestion[]> => {
           await ensureSeeded();
           const { results } = await _d1.prepare("SELECT * FROM study_questions WHERE sermon_id = ? ORDER BY id").bind(sermonId).all<StudyQuestion>();
@@ -460,6 +471,14 @@ export function createDb(d1: D1Database | null) {
       },
     },
     studyQuestions: {
+      getAll: async (ageBracket?: string): Promise<StudyQuestion[]> => {
+        ensureMemSeeded();
+        if (ageBracket) {
+          const sermonIds = memSermons.filter((s) => s.age_bracket === ageBracket).map((s) => s.id);
+          return memStudyQuestions.filter((sq) => sermonIds.includes(sq.sermon_id));
+        }
+        return [...memStudyQuestions];
+      },
       getBySermon: async (sermonId: number): Promise<StudyQuestion[]> => {
         ensureMemSeeded();
         return memStudyQuestions.filter((sq) => sq.sermon_id === sermonId);
