@@ -58,7 +58,6 @@ export default function SeniorDashboard() {
 
   const progMap = new Map(progress.map((p) => [p.sermon_id, p]));
   const completedCount = sermons.filter((s) => progMap.get(s.id)?.completed).length;
-  const allDone = sermons.length > 0 && completedCount === sermons.length;
   const bracket = "senior";
 
   function getProg(sermonId: number) {
@@ -167,16 +166,6 @@ export default function SeniorDashboard() {
                     </svg>
                     Read Topic
                   </Link>
-                  <Link
-                    href={`/quiz/play?age=${bracket}&ids=${sermon.id}`}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-semibold text-sm rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Take Quiz
-                  </Link>
-
                 </div>
               </div>
             );
@@ -191,33 +180,27 @@ export default function SeniorDashboard() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl border border-surface-border shadow-sm p-6 text-center">
-          {allDone ? (
-            <Link
-              href={`/${bracket}/quiz`}
-              className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-bold text-lg rounded-2xl shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Start Quiz Challenge!
-            </Link>
-          ) : (
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-50 text-brand-700 text-sm font-medium">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                Complete all {sermons.length} topics to unlock the final quiz
+        <div className="bg-white rounded-2xl border border-surface-border shadow-sm p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl">
+                🎯
               </div>
-              <div className="w-full max-w-xs mx-auto h-2 rounded-full bg-brand-100 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-500"
-                  style={{ width: sermons.length ? `${(completedCount / sermons.length) * 100}%` : "0%" }}
-                />
+              <div>
+                <p className="font-display text-xl font-bold text-ink">Take the Quiz</p>
+                <p className="text-sm text-ink-muted">Test your knowledge across all topics</p>
               </div>
             </div>
-          )}
+            <Link
+              href={`/quiz/play?age=${bracket}`}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-semibold text-base rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shrink-0"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Start Quiz
+            </Link>
+          </div>
         </div>
       </div>
     </div>

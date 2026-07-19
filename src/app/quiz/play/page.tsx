@@ -51,13 +51,24 @@ function QuizPlayContent() {
   const feedbackPendingRef = useRef(false);
   const webAudioRef = useRef<AudioContext | null>(null);
 
+  function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   useEffect(() => {
     async function fetchQuestions() {
-      if (!ids) return;
       try {
-        const res = await fetch(`/api/questions?age=${age}&sermonIds=${ids}`);
+        const url = ids && ids !== "all"
+          ? `/api/questions?age=${age}&sermonIds=${ids}`
+          : `/api/questions?age=${age}`;
+        const res = await fetch(url);
         const data = await res.json();
-        setQuestions(data.questions || []);
+        setQuestions(shuffle(data.questions || []));
       } catch (err) {
         console.error(err);
       } finally {
@@ -175,6 +186,9 @@ function QuizPlayContent() {
     const answerList = Object.values(answers).filter((a) => a.questionId);
 
     try {
+      const sermonIdList = ids === "all"
+        ? [...new Set(questions.map((q) => q.sermon_id))]
+        : ids.split(",").map(Number);
       const res = await fetch("/api/quiz/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -184,7 +198,7 @@ function QuizPlayContent() {
             questionId: a.questionId,
             selectedAnswer: a.selectedAnswer,
           })),
-          sermonIds: ids.split(",").map(Number),
+          sermonIds: sermonIdList,
         }),
       });
       const data = await res.json();
