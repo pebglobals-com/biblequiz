@@ -1,5 +1,6 @@
 "use client";
 
+import BibleIcon from "@/components/BibleIcon";
 import Link from "next/link";
 import { SermonData, QuestionData } from "@/lib/mockData";
 
@@ -15,12 +16,7 @@ export default function JuniorHomePage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <Link href="/" className="flex items-center gap-2">
-                <svg className="w-8 h-8 text-bible-600 dark:text-bible-400" viewBox="0 0 512 512" fill="currentColor">
-                  <path d="M40 80L340 80C356.569 80 370 93.4315 370 110L370 402C370 418.569 356.569 432 340 432L40 432C23.4315 432 10 418.569 10 402L10 110C10 93.4315 23.4315 80 40 80Z" stroke="currentColor" strokeWidth="20" fill="none"/>
-                  <path d="M340 80L380 80C396.569 80 410 93.4315 410 110L410 402C410 418.569 396.569 432 380 432L340 432" stroke="currentColor" strokeWidth="20" fill="none" opacity="0.3"/>
-                  <path d="M190 150L190 362" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
-                  <path d="M130 256L250 256" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
-                </svg>
+                <BibleIcon className="w-8 h-8 text-bible-600 dark:text-bible-400" />
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
                   <span className="text-bible-600 dark:text-bible-400">Youth Bible Quiz</span> Junior
                 </span>
@@ -177,12 +173,7 @@ export default function JuniorHomePage() {
       <footer className="bg-gray-900 dark:bg-black text-gray-400 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2 text-white font-bold text-xl mb-4 hover:text-bible-400 transition-colors">
-            <svg className="w-8 h-8 text-bible-400" viewBox="0 0 512 512" fill="currentColor">
-              <path d="M40 80L340 80C356.569 80 370 93.4315 370 110L370 402C370 418.569 356.569 432 340 432L40 432C23.4315 432 10 418.569 10 402L10 110C10 93.4315 23.4315 80 40 80Z" stroke="currentColor" strokeWidth="20" fill="none"/>
-              <path d="M340 80L380 80C396.569 80 410 93.4315 410 110L410 402C410 418.569 396.569 432 380 432L340 432" stroke="currentColor" strokeWidth="20" fill="none" opacity="0.3"/>
-              <path d="M190 150L190 362" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
-              <path d="M130 256L250 256" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
-            </svg>
+            <BibleIcon className="w-8 h-8 text-bible-400" />
             Youth Bible Quiz Guide
           </Link>
           <p className="text-sm">&copy; {new Date().getFullYear()} Youth Bible Quiz Guide. All rights reserved.</p>
