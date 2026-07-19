@@ -87,7 +87,7 @@ export default function JuniorSermonArticleClient({ slug }: { slug: string }) {
                   <path d="M130 256L250 256" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
                 </svg>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  <span className="text-bible-600 dark:text-bible-400">Bible Quiz</span> Junior
+                  <span className="text-bible-600 dark:text-bible-400">Youth Bible Quiz</span> Junior
                 </span>
               </Link>
               <div className="hidden md:flex items-center gap-1 border-l border-gray-200 dark:border-gray-700 pl-6">
@@ -197,7 +197,7 @@ export default function JuniorSermonArticleClient({ slug }: { slug: string }) {
 
       <footer className="bg-gray-900 dark:bg-black text-gray-400 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Bible Quiz Guide. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Youth Bible Quiz Guide. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -52,12 +52,12 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
     try {
       const resend = new Resend(env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "Bible Quiz <noreply@talent-loop.org>",
+        from: "Youth Bible Quiz <noreply@talent-loop.org>",
         to: email,
-        subject: "Verify your email - Bible Quiz Guide",
+        subject: "Verify your email - Youth Bible Quiz Guide",
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-            <h1 style="color: #1C1917;">Welcome to Bible Quiz Guide!</h1>
+            <h1 style="color: #1C1917;">Welcome to Youth Bible Quiz Guide!</h1>
             <p style="color: #78716C;">Hi ${first_name}, thanks for signing up. Please verify your email address to get started.</p>
             <a href="${verifyUrl}" style="display: inline-block; padding: 14px 28px; background: #7C3AED; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; margin: 16px 0;">Verify Email</a>
             <p style="color: #A8A29E; font-size: 13px;">Or paste this link into your browser:<br/>${verifyUrl}</p>

@@ -48,7 +48,7 @@ export default function ResultsDashboard({
 
   function exportReport() {
     const date = new Date().toLocaleDateString("en-US");
-    let md = `# Bible Quiz Report\n\n`;
+    let md = `# Youth Bible Quiz Report\n\n`;
     md += `**Date:** ${date}\n`;
     md += `**Age Group:** ${ageBracket === "junior" ? "Junior (5-12)" : "Senior (13-22)"}\n`;
     md += `**Score:** ${score}/${total} (${percentage}%)\n\n`;

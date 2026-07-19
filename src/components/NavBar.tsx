@@ -57,7 +57,7 @@ export default function NavBar() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
           </svg>
           <span className="text-lg font-bold hidden sm:block">
-            <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Bible Quiz</span>
+            <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Youth Bible Quiz</span>
             <span className="text-ink-light"> Guide</span>
           </span>
         </Link>

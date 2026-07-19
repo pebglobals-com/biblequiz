@@ -147,7 +147,7 @@ export default function SignupPage() {
         <div className="bg-white rounded-2xl border border-surface-border shadow-sm p-8 sm:p-10">
           <div className="text-center mb-8">
             <h1 className="font-display text-3xl font-bold text-ink mb-2">
-              Join <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Bible Quiz</span>
+              Join <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Youth Bible Quiz</span>
             </h1>
             <p className="text-ink-muted text-sm">Start your faith journey today</p>
           </div>

@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Bible Quiz Guide",
+  title: "Youth Bible Quiz Guide",
   description: "Interactive Bible quiz application for all ages",
 };
 

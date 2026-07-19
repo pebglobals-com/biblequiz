@@ -35,9 +35,9 @@ export async function onRequestPost({ request, env }: { request: Request; env: a
     try {
       const resend = new Resend(env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "Bible Quiz <noreply@talent-loop.org>",
+        from: "Youth Bible Quiz <noreply@talent-loop.org>",
         to: email,
-        subject: "Resend: Verify your email - Bible Quiz Guide",
+        subject: "Resend: Verify your email - Youth Bible Quiz Guide",
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
             <h1 style="color: #1C1917;">Verify your email</h1>

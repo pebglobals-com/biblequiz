@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 
 const READING_SECS = 10;
+const ANSWERING_SECS = 25;
 
 interface StudyQuestionData {
   id: number;
@@ -17,12 +18,14 @@ interface StudyFlowProps {
   age?: string;
 }
 
-type Phase = "intro" | "reading" | "revealed";
+type Phase = "intro" | "reading" | "answering" | "revealed";
 
 export default function StudyFlow({ questions: propQuestions, age }: StudyFlowProps) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timerSec, setTimerSec] = useState(0);
+  const [selfCorrect, setSelfCorrect] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [localQuestions, setLocalQuestions] = useState<StudyQuestionData[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -68,20 +71,23 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
   );
 
   useEffect(() => {
+    if (phase === "answering") {
+      startTimer(ANSWERING_SECS, "revealed");
+    }
+  }, [phase, startTimer]);
+
+  useEffect(() => {
     return () => clearTimer();
   }, [clearTimer]);
 
   const handleStart = useCallback(() => {
     setSessionComplete(false);
     setCurrentIndex(0);
+    setSelfCorrect(false);
+    setCorrectCount(0);
     setPhase("reading");
-    startTimer(READING_SECS, "revealed");
+    startTimer(READING_SECS, "answering");
   }, [startTimer]);
-
-  const handleReveal = useCallback(() => {
-    clearTimer();
-    setPhase("revealed");
-  }, [clearTimer]);
 
   const handleNext = useCallback(() => {
     if (currentIndex + 1 >= questions.length) {
@@ -90,8 +96,9 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
       return;
     }
     setCurrentIndex((i) => i + 1);
+    setSelfCorrect(false);
     setPhase("reading");
-    startTimer(READING_SECS, "revealed");
+    startTimer(READING_SECS, "answering");
   }, [currentIndex, questions.length, startTimer]);
 
   const handleQuit = useCallback(() => {
@@ -99,7 +106,17 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
     setSessionComplete(false);
     setPhase("intro");
     setCurrentIndex(0);
+    setSelfCorrect(false);
+    setCorrectCount(0);
   }, [clearTimer]);
+
+  const handleSelfGrade = useCallback(
+    (correct: boolean) => {
+      setSelfCorrect(correct);
+      if (correct) setCorrectCount((c) => c + 1);
+    },
+    []
+  );
 
   if (loading) {
     return (
@@ -137,8 +154,15 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
           <div className="card-base p-6 space-y-2">
             <p className="text-lg font-semibold text-ink">Session Complete</p>
             <p className="text-4xl font-bold text-brand-600">
-              {totalQuestions}
-              <span className="text-ink-muted text-2xl"> questions reviewed</span>
+              {correctCount}
+              <span className="text-ink-muted text-2xl">
+                /{totalQuestions}
+              </span>
+            </p>
+            <p className="text-sm text-ink-muted">
+              {totalQuestions > 0
+                ? `${Math.round((correctCount / totalQuestions) * 100)}% correct`
+                : ""}
             </p>
           </div>
         )}
@@ -148,17 +172,17 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
           <ul className="list-disc list-inside space-y-1 text-ink-muted">
             <li>
               You have <strong className="text-ink">{READING_SECS} seconds</strong>{" "}
-              to read each question and think about the answer.
+              to read each question.
             </li>
             <li>
-              Then the answer is revealed so you can study it.
+              Then you have{" "}
+              <strong className="text-ink">{ANSWERING_SECS} seconds</strong>{" "}
+              to think about the answer.
             </li>
             <li>
-              You can also tap <strong className="text-ink">Reveal Answer</strong> early.
+              The correct answer is revealed — grade yourself honestly.
             </li>
-            <li>
-              Review all {totalQuestions} questions to complete the session.
-            </li>
+            <li>At the end you get your total score.</li>
           </ul>
         </div>
 
@@ -171,7 +195,55 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
 
   const currentQuestion = questions[currentIndex];
   const isReading = phase === "reading";
+  const isAnswering = phase === "answering";
   const isRevealed = phase === "revealed";
+
+  function CircularTimer({ seconds, total }: { seconds: number; total: number }) {
+    const radius = 44;
+    const circumference = 2 * Math.PI * radius;
+    const progress = seconds / total;
+    const offset = circumference * (1 - progress);
+    const urgent = seconds <= 5;
+
+    return (
+      <div className="relative w-28 h-28">
+        <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 100 100">
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="6"
+            className="text-surface-border"
+          />
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="6"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className={`transition-all duration-300 ${
+              urgent ? "text-red-500" : "text-brand-500"
+            }`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span
+            className={`text-2xl font-bold font-mono ${
+              urgent ? "text-red-500" : "text-ink"
+            }`}
+          >
+            {seconds}s
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -204,13 +276,21 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
           </div>
         )}
 
+        {isAnswering && (
+          <CircularTimer seconds={timerSec} total={ANSWERING_SECS} />
+        )}
+
         <span className="text-sm text-ink-muted">
           {currentIndex + 1} / {questions.length}
         </span>
       </div>
 
       {/* Question card */}
-      <div className="card-base p-6">
+      <div
+        className={`card-base p-6 ${
+          isReading ? "border-brand-500" : ""
+        }`}
+      >
         <div className="space-y-4">
           <p className="text-sm text-ink-muted font-medium">
             Question {currentIndex + 1}
@@ -223,19 +303,32 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
 
       {/* Reading phase */}
       {isReading && (
-        <div className="text-center py-8 space-y-4">
+        <div className="text-center py-8 space-y-3">
           <p className="text-lg font-medium text-ink">
-            Read the question and think about your answer
+            Read the question carefully
           </p>
-          <button onClick={handleReveal} className="btn-primary">
-            Reveal Answer
-          </button>
+          <p className="text-sm text-ink-muted">
+            You will have {ANSWERING_SECS} seconds to think after the timer.
+          </p>
+        </div>
+      )}
+
+      {/* Answering phase */}
+      {isAnswering && (
+        <div className="text-center py-8 space-y-3">
+          <p className="text-lg font-medium text-ink">
+            Think about your answer
+          </p>
+          <p className="text-sm text-ink-muted">
+            The correct answer will be shown when the timer ends.
+          </p>
         </div>
       )}
 
       {/* Revealed phase */}
       {isRevealed && (
         <div className="space-y-4">
+          {/* Answer card */}
           <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 p-5">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 mb-2">
               Answer
@@ -245,9 +338,63 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
             </p>
           </div>
 
+          {/* Self-grade buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => handleSelfGrade(true)}
+              className={`flex-1 py-4 px-6 rounded-xl font-semibold text-base transition-all duration-200 border-2 ${
+                selfCorrect === true
+                  ? "bg-emerald-500 text-white border-emerald-600 shadow-md"
+                  : "bg-white text-emerald-700 border-emerald-300 hover:bg-emerald-50 hover:shadow-sm"
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                I Was Correct
+              </span>
+            </button>
+            <button
+              onClick={() => handleSelfGrade(false)}
+              className={`flex-1 py-4 px-6 rounded-xl font-semibold text-base transition-all duration-200 border-2 ${
+                selfCorrect === false
+                  ? "bg-red-500 text-white border-red-600 shadow-md"
+                  : "bg-white text-red-700 border-red-300 hover:bg-red-50 hover:shadow-sm"
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+                I Was Incorrect
+              </span>
+            </button>
+          </div>
+
           <button onClick={handleNext} className="btn-primary w-full justify-center">
             {currentIndex + 1 >= questions.length
-              ? "Complete Session"
+              ? "See Results"
               : "Next Question"}
           </button>
         </div>

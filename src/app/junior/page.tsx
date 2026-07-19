@@ -22,7 +22,7 @@ export default function JuniorHomePage() {
                   <path d="M130 256L250 256" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
                 </svg>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  <span className="text-bible-600 dark:text-bible-400">Bible Quiz</span> Junior
+                  <span className="text-bible-600 dark:text-bible-400">Youth Bible Quiz</span> Junior
                 </span>
               </Link>
             </div>
@@ -50,7 +50,7 @@ export default function JuniorHomePage() {
                 Ages 5-12 • Fun & Engaging Bible Learning
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-                Welcome to <span className="bg-gradient-to-r from-bible-600 to-purple-600 bg-clip-text text-transparent">Junior Bible Quiz</span>
+                Welcome to <span className="bg-gradient-to-r from-bible-600 to-purple-600 bg-clip-text text-transparent">Youth Bible Quiz Junior</span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
                 Discover God's Word through age-appropriate sermons, interactive Q&A sessions, and fun quizzes designed just for young hearts and minds.
@@ -112,7 +112,7 @@ export default function JuniorHomePage() {
                 bgGradient="from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-900/10"
               />
               <CategoryNavCard
-                title="Bible Quiz"
+                title="Youth Bible Quiz"
                 description="Test your knowledge with timed quizzes from the Q&A you studied"
                 icon={<TrophyIcon className="w-10 h-10" />}
                 href="/junior/quiz"
@@ -183,9 +183,9 @@ export default function JuniorHomePage() {
               <path d="M190 150L190 362" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
               <path d="M130 256L250 256" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
             </svg>
-            Bible Quiz Guide
+            Youth Bible Quiz Guide
           </Link>
-          <p className="text-sm">&copy; {new Date().getFullYear()} Bible Quiz Guide. All rights reserved.</p>
+          <p className="text-sm">&copy; {new Date().getFullYear()} Youth Bible Quiz Guide. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -220,7 +220,7 @@ export default function Home() {
 
           <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold mb-5 tracking-tight leading-[1.1] text-balance">
             <span className="bg-gradient-to-r from-brand-700 via-accent-500 to-brand-700 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-x">
-              Bible Quiz Guide
+              Youth Bible Quiz Guide
             </span>
           </h1>
 
@@ -312,11 +312,11 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
             </svg>
             <span className="font-display text-xl font-bold">
-              <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Bible Quiz</span>
+              <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Youth Bible Quiz</span>
               <span className="text-ink-light"> Guide</span>
             </span>
           </div>
-          <p className="text-ink-light text-sm">&copy; {new Date().getFullYear()} Bible Quiz Guide. Study. Learn. Grow in Faith.</p>
+          <p className="text-ink-light text-sm">&copy; {new Date().getFullYear()} Youth Bible Quiz Guide. Study. Learn. Grow in Faith.</p>
         </div>
       </footer>
     </div>

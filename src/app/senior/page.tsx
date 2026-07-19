@@ -22,7 +22,7 @@ export default function SeniorHomePage() {
                   <path d="M130 256L250 256" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
                 </svg>
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  <span className="text-bible-600 dark:text-bible-400">Bible Quiz</span> Senior
+                  <span className="text-bible-600 dark:text-bible-400">Youth Bible Quiz</span> Senior
                 </span>
               </Link>
             </div>
@@ -50,7 +50,7 @@ export default function SeniorHomePage() {
                 Ages 13-22 • Deep & Challenging Bible Study
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-                Welcome to <span className="bg-gradient-to-r from-bible-600 to-purple-600 bg-clip-text text-transparent">Senior Bible Quiz</span>
+                Welcome to <span className="bg-gradient-to-r from-bible-600 to-purple-600 bg-clip-text text-transparent">Youth Bible Quiz Senior</span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
                 Engage with deep theological topics, apologetics, worldview studies, and challenging quizzes designed for maturing faith and critical thinking.
@@ -112,7 +112,7 @@ export default function SeniorHomePage() {
                 bgGradient="from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/10"
               />
               <CategoryNavCard
-                title="Bible Quiz"
+                title="Youth Bible Quiz"
                 description="Test your knowledge with timed quizzes from the Q&A you studied"
                 icon={<TrophyIcon className="w-10 h-10" />}
                 href="/senior/quiz"
@@ -183,9 +183,9 @@ export default function SeniorHomePage() {
               <path d="M190 150L190 362" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
               <path d="M130 256L250 256" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round"/>
             </svg>
-            Bible Quiz Guide
+            Youth Bible Quiz Guide
           </Link>
-          <p className="text-sm">&copy; {new Date().getFullYear()} Bible Quiz Guide. All rights reserved.</p>
+          <p className="text-sm">&copy; {new Date().getFullYear()} Youth Bible Quiz Guide. All rights reserved.</p>
         </div>
       </footer>
     </div>
