@@ -1,5 +1,6 @@
 "use client";
 
+import BibleIcon from "@/components/BibleIcon";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -31,9 +32,11 @@ const features = [
     desc: "Read and understand God's Word through age-appropriate sermons and articles.",
     featured: false,
     icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-      </svg>
+      <img
+        src="/images/open-bible-ribbon.jpg"
+        alt=""
+        className="w-6 h-6 rounded object-cover"
+      />
     ),
   },
   {
@@ -308,9 +311,7 @@ export default function Home() {
       <footer className="py-10 px-4 border-t border-surface-border">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <svg className="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-            </svg>
+            <BibleIcon className="w-6 h-6 rounded" />
             <span className="font-display text-xl font-bold">
               <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">Youth Bible Quiz</span>
               <span className="text-ink-light"> Guide</span>
