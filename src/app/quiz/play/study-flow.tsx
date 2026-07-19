@@ -2,6 +2,15 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 const READING_SECS = 10;
 const ANSWERING_SECS = 25;
 
@@ -28,10 +37,14 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
   const [correctCount, setCorrectCount] = useState(0);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [localQuestions, setLocalQuestions] = useState<StudyQuestionData[] | null>(null);
+  const [sessionQuestions, setSessionQuestions] = useState<StudyQuestionData[]>([]);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const questions = propQuestions ?? localQuestions ?? [];
+  const rawQuestions = propQuestions ?? localQuestions ?? [];
+  const questions = (phase !== "intro" && sessionQuestions.length > 0)
+    ? sessionQuestions
+    : rawQuestions;
 
   useEffect(() => {
     if (propQuestions) return;
@@ -81,13 +94,16 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
   }, [clearTimer]);
 
   const handleStart = useCallback(() => {
+    const source = propQuestions ?? localQuestions ?? [];
+    if (source.length === 0) return;
+    setSessionQuestions(shuffle(source));
     setSessionComplete(false);
     setCurrentIndex(0);
     setSelfCorrect(false);
     setCorrectCount(0);
     setPhase("reading");
     startTimer(READING_SECS, "answering");
-  }, [startTimer]);
+  }, [startTimer, propQuestions, localQuestions]);
 
   const handleNext = useCallback(() => {
     if (currentIndex + 1 >= questions.length) {
@@ -104,6 +120,7 @@ export default function StudyFlow({ questions: propQuestions, age }: StudyFlowPr
   const handleQuit = useCallback(() => {
     clearTimer();
     setSessionComplete(false);
+    setSessionQuestions([]);
     setPhase("intro");
     setCurrentIndex(0);
     setSelfCorrect(false);
