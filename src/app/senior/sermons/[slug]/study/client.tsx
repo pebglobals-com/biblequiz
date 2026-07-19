@@ -80,11 +80,11 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b1120]">
+      <div className="min-h-screen bg-surface">
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="skeleton h-5 w-40 mb-6" />
-          <div className="skeleton h-64 rounded-3xl mb-4" />
-          <div className="skeleton h-96 rounded-3xl" />
+          <div className="skeleton h-64 rounded-2xl mb-4" />
+          <div className="skeleton h-96 rounded-2xl" />
         </div>
       </div>
     );
@@ -92,11 +92,11 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
 
   if (!sermon) {
     return (
-      <div className="min-h-screen bg-[#0b1120] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
         <div className="text-center">
           <div className="text-5xl mb-4">📖</div>
-          <h1 className="text-2xl font-bold text-white mb-2">Topic Not Found</h1>
-          <p className="text-gray-400 mb-6">This topic doesn&apos;t exist or has been moved.</p>
+          <h1 className="text-2xl font-bold text-ink mb-2">Topic Not Found</h1>
+          <p className="text-ink-muted mb-6">This topic doesn&apos;t exist or has been moved.</p>
           <Link href="/senior/dashboard" className="btn-primary inline-flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -111,15 +111,16 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
   const bracket = "senior";
 
   return (
-    <div className="min-h-screen bg-[#0b1120] relative overflow-hidden">
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] rounded-full bg-gradient-radial from-bible-500/10 to-transparent blur-3xl" />
+    <div className="min-h-screen bg-surface relative">
+      <div className="fixed inset-0 -z-10 bg-surface">
+        <div className="absolute inset-0 bg-dots-light" />
+        <div className="absolute top-0 left-0 right-0 h-[600px] bg-gradient-glow" />
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Link
           href={`/${bracket}/dashboard`}
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 group animate-in"
+          className="inline-flex items-center gap-2 text-ink-muted hover:text-brand-600 transition-colors mb-6 group animate-in"
         >
           <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -127,19 +128,18 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
           Back to Dashboard
         </Link>
 
-        <article className="glass rounded-3xl overflow-hidden border border-white/5 animate-in" style={{ animationDelay: "100ms", animationFillMode: "forwards" }}>
-          <div className="relative bg-gradient-to-br from-bible-700 via-purple-700 to-bible-800 p-8 sm:p-12">
-            <div className="absolute inset-0 bg-grid opacity-10" />
+        <article className="bg-white rounded-2xl border border-surface-border shadow-sm overflow-hidden animate-in" style={{ animationDelay: "100ms", animationFillMode: "forwards" }}>
+          <div className="relative bg-gradient-to-br from-brand-700 via-brand-600 to-brand-800 p-8 sm:p-12">
             <div className="relative">
               <div className="flex items-center gap-3 mb-4">
                 <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
                   {sermon.category}
                 </span>
-                <span className="px-3 py-1.5 bg-purple-500/20 backdrop-blur-sm rounded-full text-sm font-medium text-purple-200">
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
                   🧑 Senior
                 </span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-display font-bold text-white leading-tight">
                 {sermon.title}
               </h1>
               <p className="mt-3 text-white/70 text-sm">
@@ -153,27 +153,26 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
           </div>
 
           <div className="p-8 sm:p-12">
-            <div className="space-y-6 text-gray-300 leading-relaxed text-lg">
+            <div className="space-y-6 text-ink leading-relaxed text-lg font-sans">
               {sermon.content.split("\n\n").map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
               ))}
             </div>
 
-            {/* Completion section */}
-            <div className="mt-12 pt-8 border-t border-white/5">
+            <div className="mt-12 pt-8 border-t border-surface-border">
               {done || alreadyCompleted ? (
                 <div className="text-center space-y-6">
-                  <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-green-50 border border-green-200">
+                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <div className="text-left">
-                      <p className="text-emerald-300 font-bold text-lg">
+                      <p className="text-green-800 font-bold text-lg">
                         {done ? "Completed!" : "Already Completed"}
                       </p>
-                      <p className="text-emerald-400/70 text-sm">Great job studying God&apos;s Word!</p>
+                      <p className="text-green-600 text-sm">Great job studying God&apos;s Word!</p>
                     </div>
                   </div>
                   <div>
