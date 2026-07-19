@@ -127,7 +127,6 @@ export default function JuniorDashboard() {
           {sermons.map((sermon, idx) => {
             const prog = getProg(sermon.id);
             const isCompleted = prog?.completed === 1;
-            const quizReady = prog?.completed === 1 && prog?.questions_done === 1;
             return (
               <div
                 key={sermon.id}
@@ -166,35 +165,18 @@ export default function JuniorDashboard() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    Read Sermon
+                    Read Topic
                   </Link>
-                  {quizReady ? (
-                    <Link
-                      href={`/quiz/play?age=${bracket}&ids=${sermon.id}`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-semibold text-sm rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Take Quiz
-                    </Link>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-muted text-ink-light font-semibold text-sm rounded-xl cursor-not-allowed">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                      Take Quiz
-                    </span>
-                  )}
                   <Link
-                    href={`/${bracket}/questions/${sermon.id}`}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-surface-border text-ink-muted font-semibold text-sm rounded-xl hover:border-ink-light hover:text-ink transition-all duration-200"
+                    href={`/quiz/play?age=${bracket}&ids=${sermon.id}`}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-semibold text-sm rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Study Q&A
+                    Take Quiz
                   </Link>
+
                 </div>
               </div>
             );
