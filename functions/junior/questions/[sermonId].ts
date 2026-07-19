@@ -4,7 +4,7 @@ export async function onRequest({ request, env }: { request: Request; env: any }
   if (!id) return new Response("Not found", { status: 404 });
   const ph = await env.ASSETS.fetch(new Request(new URL("/junior/questions/placeholder/", request.url)));
   if (!ph.ok) return new Response("Not found", { status: 404 });
-  return new Response((await ph.text()).replaceAll('"placeholder"', `"${id}"`), {
+  return new Response((await ph.text()).replaceAll('\\"placeholder\\"', '\\"' + id + '\\"'), {
     headers: { "content-type": "text/html; charset=utf-8" },
   });
 }
