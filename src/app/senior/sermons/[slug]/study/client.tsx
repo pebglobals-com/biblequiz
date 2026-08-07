@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface SermonData {
@@ -15,23 +14,8 @@ interface SermonData {
 }
 
 export default function SeniorStudyClient({ slug }: { slug: string }) {
-  const router = useRouter();
-
-  const [userId, setUserId] = useState<number | null>(null);
   const [sermon, setSermon] = useState<SermonData | null>(null);
-  const [alreadyCompleted, setAlreadyCompleted] = useState(false);
-  const [marking, setMarking] = useState(false);
-  const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const uid = localStorage.getItem("userId");
-    if (!uid) {
-      router.push("/signup");
-      return;
-    }
-    setUserId(Number(uid));
-  }, [router]);
 
   useEffect(() => {
     async function load() {
@@ -40,15 +24,6 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
         const data = await res.json();
         const found = (data.sermons || []).find((s: SermonData) => s.slug === slug);
         setSermon(found || null);
-
-        if (found && userId) {
-          const progRes = await fetch(`/api/users/${userId}/progress`);
-          const progData = await progRes.json();
-          const prog = (progData.progress || []).find(
-            (p: any) => p.sermon_id === found.id && p.completed
-          );
-          if (prog) setAlreadyCompleted(true);
-        }
       } catch (err) {
         console.error("Failed to load sermon:", err);
       } finally {
@@ -56,27 +31,7 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
       }
     }
     load();
-  }, [slug, userId]);
-
-  async function markComplete() {
-    if (!sermon || !userId || marking) return;
-    setMarking(true);
-    try {
-      const res = await fetch(`/api/users/${userId}/progress`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sermonId: sermon.id, completed: 1 }),
-      });
-      if (res.ok) {
-        setDone(true);
-        setAlreadyCompleted(true);
-      }
-    } catch (err) {
-      console.error("Failed to mark complete:", err);
-    } finally {
-      setMarking(false);
-    }
-  }
+  }, [slug]);
 
   if (loading) {
     return (
@@ -160,59 +115,28 @@ export default function SeniorStudyClient({ slug }: { slug: string }) {
             </div>
 
             <div className="mt-12 pt-8 border-t border-surface-border">
-              {done || alreadyCompleted ? (
-                <div className="text-center space-y-6">
-                  <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-green-50 border border-green-200">
-                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-green-800 font-bold text-lg">
-                        {done ? "Completed!" : "Already Completed"}
-                      </p>
-                      <p className="text-green-600 text-sm">Great job studying God&apos;s Word!</p>
-                    </div>
-                  </div>
-                  <div>
-                    <Link
-                      href={`/${bracket}/dashboard`}
-                      className="btn-primary inline-flex items-center gap-2 px-8 py-4 text-lg"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                      </svg>
-                      Back to Dashboard
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <button
-                    onClick={markComplete}
-                    disabled={marking}
-                    className="px-10 py-5 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              <div className="text-center space-y-4">
+                <p className="text-ink-muted text-sm">
+                  Deepen your understanding with study questions, then test your knowledge with a quiz.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link
+                    href={`/${bracket}/questions/${sermon.id}`}
+                    className="btn-primary inline-flex items-center justify-center gap-2 px-8 py-4 text-lg"
                   >
-                    {marking ? (
-                      <span className="flex items-center gap-3">
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Marking...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-3">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Mark as Complete
-                      </span>
-                    )}
-                  </button>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Continue to Study Questions
+                  </Link>
+                  <Link
+                    href={`/${bracket}/dashboard`}
+                    className="btn-secondary inline-flex items-center justify-center gap-2 px-8 py-4 text-lg"
+                  >
+                    Back to Dashboard
+                  </Link>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </article>

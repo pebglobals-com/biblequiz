@@ -233,7 +233,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              href="/signup"
+              href="/choose-category"
               className="btn-primary group text-base"
             >
               <span>Get Started</span>
