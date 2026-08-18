@@ -90,7 +90,7 @@ export default function AdminPage() {
   );
 }
 
-function StudyQAManager() {
+function StudyQAManager({ category }: { category: "junior" | "senior" }) {
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [questions, setQuestions] = useState<{ id: number; question_text: string; answer_text: string }[]>([]);
   const [selectedSermonId, setSelectedSermonId] = useState<number | "">("");
@@ -153,14 +153,14 @@ function StudyQAManager() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-ink mb-6">Study Q&A</h2>
+      <h2 className="text-2xl font-bold text-ink mb-6">Study Q&A <span className={`text-sm font-bold uppercase tracking-wide ${category === "junior" ? "text-blue-600" : "text-purple-600"}`}>({category === "junior" ? "Junior" : "Senior"})</span></h2>
       <p className="text-sm text-ink-muted mb-6">Open-ended study questions shown on the per-sermon Q&A page (separate from quiz questions).</p>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium text-ink mb-1">Select Sermon</label>
+        <label className="block text-sm font-medium text-ink mb-1">Select {category === "junior" ? "Junior" : "Senior"} Sermon</label>
         <select value={selectedSermonId} onChange={(e) => { setSelectedSermonId(e.target.value ? Number(e.target.value) : ""); resetForm(); }} className="w-full max-w-md px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500">
-          <option value="">— Choose a sermon —</option>
-          {sermons.map(s => <option key={s.id} value={s.id}>{s.title} ({s.age_bracket})</option>)}
+          <option value="">— Choose a {category} sermon —</option>
+          {sermons.filter(s => s.age_bracket === category).map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
         </select>
       </div>
 
@@ -231,6 +231,7 @@ function StudyQAManager() {
 
 function AdminDashboard() {
   const [tab, setTab] = useState<"sermons" | "questions" | "study">("sermons");
+  const [category, setCategory] = useState<"junior" | "senior">("junior");
 
   return (
     <div className="min-h-screen bg-surface">
@@ -244,29 +245,37 @@ function AdminDashboard() {
               <button onClick={() => setTab("study")} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === "study" ? "bg-brand-600 text-white shadow-sm" : "text-ink-muted hover:bg-brand-50 hover:text-brand-700"}`}>Study Q&A</button>
             </nav>
           </div>
-          <button
-            onClick={() => { localStorage.removeItem("adminAuthed"); window.location.href = "/admin"; }}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-red-600 hover:bg-red-50 transition-all"
-          >
-            Sign Out
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+              <button onClick={() => setCategory("junior")} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${category === "junior" ? "bg-blue-600 text-white shadow-sm" : "text-ink-muted hover:bg-blue-50 hover:text-blue-700"}`}>Junior</button>
+              <button onClick={() => setCategory("senior")} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${category === "senior" ? "bg-purple-600 text-white shadow-sm" : "text-ink-muted hover:bg-purple-50 hover:text-purple-700"}`}>Senior</button>
+            </div>
+            <button
+              onClick={() => { localStorage.removeItem("adminAuthed"); window.location.href = "/admin"; }}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-red-600 hover:bg-red-50 transition-all"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {tab === "sermons" ? <SermonManager /> : tab === "questions" ? <QuestionManager /> : <StudyQAManager />}
+        {tab === "sermons" ? <SermonManager key={category} category={category} /> : tab === "questions" ? <QuestionManager key={category} category={category} /> : <StudyQAManager key={category} category={category} />}
       </main>
     </div>
   );
 }
 
-function SermonManager() {
+function SermonManager({ category }: { category: "junior" | "senior" }) {
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<number | "new" | null>(null);
   const [form, setForm] = useState<{ title: string; category: string; age_bracket: "junior" | "senior"; content: string; excerpt: string; source_url: string }>({ title: "", category: "", age_bracket: "junior", content: "", excerpt: "", source_url: "" });
   const [saving, setSaving] = useState(false);
+
+  const filteredSermons = sermons.filter((s) => s.age_bracket === category);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -281,7 +290,7 @@ function SermonManager() {
   useEffect(() => { load(); }, [load]);
 
   function resetForm() {
-    setForm({ title: "", category: "", age_bracket: "junior", content: "", excerpt: "", source_url: "" });
+    setForm({ title: "", category: "", age_bracket: category, content: "", excerpt: "", source_url: "" });
     setEditingId(null);
   }
 
@@ -322,10 +331,10 @@ function SermonManager() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-ink">Sermons ({sermons.length})</h2>
+        <h2 className="text-2xl font-bold text-ink">Sermons <span className={`text-sm font-bold uppercase tracking-wide ${category === "junior" ? "text-blue-600" : "text-purple-600"}`}>({category === "junior" ? "Junior" : "Senior"})</span> — {filteredSermons.length}</h2>
         {editingId === null && (
-          <button onClick={() => { setEditingId("new"); setForm({ title: "", category: "", age_bracket: "junior", content: "", excerpt: "", source_url: "" }); }} className="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-all">
-            + Add Sermon
+          <button onClick={() => { setEditingId("new"); setForm({ title: "", category: "", age_bracket: category, content: "", excerpt: "", source_url: "" }); }} className="px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-all">
+            + Add {category === "junior" ? "Junior" : "Senior"} Sermon
           </button>
         )}
       </div>
@@ -375,11 +384,11 @@ function SermonManager() {
 
       {loading ? (
         <div className="text-center py-12 text-ink-muted">Loading...</div>
-      ) : sermons.length === 0 ? (
-        <div className="text-center py-12 text-ink-muted">No sermons yet. Click "Add Sermon" to create one.</div>
+      ) : filteredSermons.length === 0 ? (
+        <div className="text-center py-12 text-ink-muted">No {category} sermons yet. Click "Add {category === "junior" ? "Junior" : "Senior"} Sermon" to create one.</div>
       ) : (
         <div className="space-y-3">
-          {sermons.map((s) => (
+          {filteredSermons.map((s) => (
             <div key={s.id} className={`bg-white rounded-2xl border ${editingId === s.id ? "border-brand-500 ring-2 ring-brand-500/20" : "border-surface-border"} shadow-sm p-5`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -402,7 +411,7 @@ function SermonManager() {
   );
 }
 
-function QuestionManager() {
+function QuestionManager({ category }: { category: "junior" | "senior" }) {
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedSermonId, setSelectedSermonId] = useState<number | "">("");
@@ -473,13 +482,13 @@ function QuestionManager() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-ink mb-6">Questions</h2>
+      <h2 className="text-2xl font-bold text-ink mb-6">Questions <span className={`text-sm font-bold uppercase tracking-wide ${category === "junior" ? "text-blue-600" : "text-purple-600"}`}>({category === "junior" ? "Junior" : "Senior"})</span></h2>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium text-ink mb-1">Select Sermon</label>
+        <label className="block text-sm font-medium text-ink mb-1">Select {category === "junior" ? "Junior" : "Senior"} Sermon</label>
         <select value={selectedSermonId} onChange={(e) => { setSelectedSermonId(e.target.value ? Number(e.target.value) : ""); resetForm(); }} className="w-full max-w-md px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500">
-          <option value="">— Choose a sermon —</option>
-          {sermons.map(s => <option key={s.id} value={s.id}>{s.title} ({s.age_bracket})</option>)}
+          <option value="">— Choose a {category} sermon —</option>
+          {sermons.filter(s => s.age_bracket === category).map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
         </select>
       </div>
 
@@ -573,7 +582,7 @@ function QuestionManager() {
   );
 }
 
-function StudyQAManager() {
+function StudyQAManager({ category }: { category: "junior" | "senior" }) {
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [questions, setQuestions] = useState<{ id: number; question_text: string; answer_text: string }[]>([]);
   const [selectedSermonId, setSelectedSermonId] = useState<number | "">("");
@@ -636,14 +645,14 @@ function StudyQAManager() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-ink mb-6">Study Q&A</h2>
+      <h2 className="text-2xl font-bold text-ink mb-6">Study Q&A <span className={`text-sm font-bold uppercase tracking-wide ${category === "junior" ? "text-blue-600" : "text-purple-600"}`}>({category === "junior" ? "Junior" : "Senior"})</span></h2>
       <p className="text-sm text-ink-muted mb-6">Open-ended study questions shown on the per-sermon Q&A page (separate from quiz questions).</p>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium text-ink mb-1">Select Sermon</label>
+        <label className="block text-sm font-medium text-ink mb-1">Select {category === "junior" ? "Junior" : "Senior"} Sermon</label>
         <select value={selectedSermonId} onChange={(e) => { setSelectedSermonId(e.target.value ? Number(e.target.value) : ""); resetForm(); }} className="w-full max-w-md px-3 py-2 rounded-xl border border-surface-border bg-white text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500">
-          <option value="">— Choose a sermon —</option>
-          {sermons.map(s => <option key={s.id} value={s.id}>{s.title} ({s.age_bracket})</option>)}
+          <option value="">— Choose a {category} sermon —</option>
+          {sermons.filter(s => s.age_bracket === category).map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
         </select>
       </div>
 
