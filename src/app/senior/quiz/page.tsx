@@ -52,7 +52,7 @@ export default function SeniorQuizGate() {
             Challenge yourself with {sermons.length > 0 ? `${sermons.length} ` : ""}study topics from the Senior category.
           </p>
           <Link
-            href={`/quiz/play?age=senior&ids=${sermons.length > 0 ? sermons.map(s => s.id).join(",") : "all"}`}
+            href="/quiz/play?age=senior"
             className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
