@@ -1,6 +1,7 @@
 "use client";
 
 import BibleIcon from "@/components/BibleIcon";
+import { getSermonImage } from "@/lib/sermonImages";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -98,10 +99,19 @@ interface SermonCardProps {
 }
 
 function SermonCard({ sermon }: SermonCardProps) {
+  const [imgError, setImgError] = useState(false);
   return (
     <Link href={`/senior/sermons/${sermon.slug}`} className="block group">
       <div className="card-hover h-full overflow-hidden">
         <div className="aspect-video bg-gradient-to-br from-bible-500 to-purple-600 relative overflow-hidden">
+          {!imgError && (
+            <img
+              src={getSermonImage(sermon.slug)}
+              alt={sermon.title}
+              onError={() => setImgError(true)}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">

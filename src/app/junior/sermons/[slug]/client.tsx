@@ -1,6 +1,7 @@
 "use client";
 
 import BibleIcon from "@/components/BibleIcon";
+import { getSermonImage } from "@/lib/sermonImages";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -109,7 +110,13 @@ export default function JuniorSermonArticleClient({ slug }: { slug: string }) {
 
           <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
             <div className="relative aspect-video bg-gradient-to-br from-blue-500 via-bible-600 to-purple-700">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <img
+                src={getSermonImage(sermon.slug)}
+                alt={sermon.title}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
