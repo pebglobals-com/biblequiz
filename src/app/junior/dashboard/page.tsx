@@ -140,7 +140,7 @@ export default function JuniorDashboard() {
               </div>
             </div>
             <Link
-              href={`/quiz/play?age=${bracket}&ids=all`}
+              href={`/quiz/play?age=${bracket}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-700 text-white font-semibold text-base rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shrink-0"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
